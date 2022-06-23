@@ -13,7 +13,7 @@ jobs:
     steps:
 
       - name: Check out
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up the environment
         uses: ./.github/workflows/setup-poetry-env
@@ -34,7 +34,7 @@ jobs:
         python-version: ['3.8', '3.9', '3.10']
     steps:
       - name: Check out
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up the environment
         uses: ./.github/workflows/setup-poetry-env

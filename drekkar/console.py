@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 import click
-from click_help_colors import HelpColorsCommand
+from click_help_colors import HelpColorsCommand  # type: ignore
 from rich.logging import RichHandler
 from rich.traceback import install
 
@@ -30,8 +30,8 @@ rlog = logging.getLogger()
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     cls=HelpColorsCommand,
-    help_headers_color="blue",  # type: ignore
-    help_options_color="magenta",  # type: ignore
+    help_headers_color="blue",
+    help_options_color="magenta",
 )
 def main() -> int:
     """Drekkar ships the Worldr infrastructure."""
