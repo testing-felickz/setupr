@@ -1,0 +1,41 @@
+site_name: drekkar
+repo_url: https://github.com/worldr/drekkar
+site_url: https://worldr.github.io/drekkar
+site_description: Drekkar ships the Worldr infrastructure.
+site_author: Dr Yann Golanski
+
+nav:
+  - Home: index.md
+  - Modules: modules.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+            setup_commands:
+                - import sys
+                - sys.path.append('../')
+copyright: Maintained by Dr Yann Golanski.
+theme:
+  name: material
+  favicon: assets/favicon.png
+  feature:
+    tabs: true
+  palette:
+    primary: white
+    accent: blue
+  logo: assets/logo.png
+  features:
+    - navigation.instant
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - admonition
+  - pymdownx.highlight:
+      use_pygments: true
+      auto_title: true
+      linenums: true
+      linenums_style: pymdownx-inline
+  - pymdownx.superfences
