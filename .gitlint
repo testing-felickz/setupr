@@ -12,4 +12,4 @@ ignore=B6,body-is-missing
 
 [contrib-title-conventional-commits]
 # Specify allowed commit types. For details see: https://www.conventionalcommits.org/
-#types = bugfix,user-story,epic
+types = build, ci, docs, feat, fix, perf, refactor, style, test
