@@ -1,14 +1,19 @@
-# drekkar
+# Drekkar
+
+<img src="https://github.com/worldr/drekkar/blob/main/docs/assets/logo.png" width=25% height=25% >
 
 [![Release](https://img.shields.io/github/v/release/worldr/drekkar)](https://img.shields.io/github/v/release/worldr/drekkar)
 [![Build status](https://img.shields.io/github/workflow/status/worldr/drekkar/merge-to-main)](https://img.shields.io/github/workflow/status/worldr/drekkar/merge-to-main)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/worldr/drekkar)](https://img.shields.io/github/commit-activity/m/worldr/drekkar)
+
 [![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://worldr.github.io/drekkar/)
 [![Code style with black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports with isort](https://img.shields.io/badge/%20imports-isort-%231674b1)](https://pycqa.github.io/isort/)
 [![License](https://img.shields.io/github/license/worldr/drekkar)](https://img.shields.io/github/license/worldr/drekkar)
 
-Drekkar ships the Worldr infrastructure…
+---- 
+
+## Drekkar ships the Worldr infrastructure…
 
 - **Github repository**: <https://github.com/worldr/drekkar/>
 - **Documentation** <https://worldr.github.io/drekkar/>
