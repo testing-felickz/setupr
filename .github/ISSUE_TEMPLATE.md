@@ -4,7 +4,7 @@
 
 * [ ] I did check there are no other issue relating to this.
 * [ ] I am running a *supported* version.
-* [ ] Drekkar version given by `drekkar --version`:
+* [ ] Drakkar version given by `drakkar --version`:
 * [ ] Python version given by `python --version`:
 
 ### What are the steps to reproduce it?

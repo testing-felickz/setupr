@@ -32,8 +32,8 @@ cumbersome.
 
 If we release this as open source, we can use the [Python Package
 Index](https://pypi.org/) and thus all customers need to do is run `python -m
-pip install drekkar` to get it. Updating the script is simper too: `python -m
-pip install --update drekkar`.
+pip install drakkar` to get it. Updating the script is simper too: `python -m
+pip install --update drakkar`.
 
 If not, we can provide a wheel file (needs checksums) or run our own package
 index. The former is the most cumbersome, whereas the latter is much more work

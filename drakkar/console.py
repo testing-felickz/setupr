@@ -20,7 +20,7 @@ logging.basicConfig(
     handlers=[
         RichHandler(rich_tracebacks=True),
         RotatingFileHandler(
-            "drekkar.log", maxBytes=13 * 1024 * 1024, backupCount=7
+            "drakkar.log", maxBytes=13 * 1024 * 1024, backupCount=7
         ),
     ],
 )
@@ -34,7 +34,7 @@ rlog = logging.getLogger()
     help_options_color="magenta",
 )
 def main() -> int:
-    """Drekkar ships the Worldr infrastructure."""
+    """Drakkar ships the Worldr infrastructure."""
     rlog.info("Start")
     rlog.info("End")
     return 0
