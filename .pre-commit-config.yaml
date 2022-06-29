@@ -11,13 +11,6 @@ repos:
   - id: check-toml
   - id: debug-statements  # Python only!
   - id: fix-encoding-pragma  # Python only!
-#     ____________________________________
-# ___/ Codespell… Can be really annoying. \___________________________________
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
-  hooks:
-  - id: codespell
-    args: [-L, 'usig,persistant']
 #     __________________
 # ___/ Python specific. \______________________________________________________
 - repo: https://github.com/psf/black
@@ -26,6 +19,7 @@ repos:
   - id: black
 - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
   rev: v1.2.4
+  exclue: ^/docs/requirements.md
   hooks:
   - id: python-safety-dependencies-check
 # Statically populate the known_third_party isort setting.

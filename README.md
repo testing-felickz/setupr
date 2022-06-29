@@ -11,7 +11,7 @@
 [![Imports with isort](https://img.shields.io/badge/%20imports-isort-%231674b1)](https://pycqa.github.io/isort/)
 [![License](https://img.shields.io/github/license/worldr/drakkar)](https://img.shields.io/github/license/worldr/drakkar)
 
----- 
+----
 
 ## Drakkar ships the Worldr infrastructure…
 
@@ -36,6 +36,40 @@ For more details, see [here](https://fpgmaas.github.io/cookiecutter-poetry/relea
 pre-commit install
 pre-commit install --hook-type commit-msg
 ```
+
+## Testing
+
+### GnuPG
+
+We use [python-gnupg](https://gnupg.readthedocs.io/en/latest/#) and
+[GnuPG](https://gnupg.org/).
+
+The file `tests/charon-lord-dunsany.txt` is a short story by [Lord
+Dunsany](https://en.wikipedia.org/wiki/Lord_Dunsany) about Charon. It has a
+valid and an invalid signature files. *If the main file is edited, a new valid
+signature needs to be generated.*
+
+```bash
+gpg --default-key "worldr-for-mst@worldr.com" --armour --output tests/NEW-charon-lord-dunsany-good.sig --detach-sign tests/charon-lord-dunsany.txt
+```
+
+You can test the signature files like so:
+
+```bash
+√ .venv; gpg --verify tests/charon-lord-dunsany-good.sig tests/charon-lord-dunsany.txt
+gpg: Signature made Tue 28 Jun 2022 11:27:22 BST
+gpg:                using RSA key 935D282626A16D1A0430487D65A277F7800F774C
+gpg:                issuer "worldr-for-mst@worldr.com"
+gpg: Good signature from "Worldr Technologies (MST application) <worldr-for-mst@worldr.com>" [ultimate]
+√ .venv; gpg --verify tests/charon-lord-dunsany-bad.sig tests/charon-lord-dunsany.txt
+gpg: Signature made Tue 28 Jun 2022 11:24:42 BST
+gpg:                using RSA key 935D282626A16D1A0430487D65A277F7800F774C
+gpg:                issuer "worldr-for-mst@worldr.com"
+gpg: BAD signature from "Worldr Technologies (MST application) <worldr-for-mst@worldr.com>" [ultimate]
+```
+
+There is a test that runs iff the Worldr key is in the local key ring. This
+should be true for most developers. If not, the test is skipped.
 
 ---
 

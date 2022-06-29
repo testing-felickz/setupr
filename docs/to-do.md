@@ -39,7 +39,7 @@ If not, we can provide a wheel file (needs checksums) or run our own package
 index. The former is the most cumbersome, whereas the latter is much more work
 than just using [pypi](https://pypi.org/).
 
-* [ ] GPG: Install and setup then uploads the Worldr GPG key -- if needed.
+* [X] GPG: Install and setup then uploads the Worldr GPG key -- if needed.
 * [ ] Downloads & verify the infrastructure installation script.
 * [ ] Runs the debug script(s).
 * [ ] Runs all pre-flight checks with [goss](https://github.com/aelsabbahy/goss) -- if needed.
