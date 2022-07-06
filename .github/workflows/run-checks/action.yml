@@ -9,6 +9,11 @@ runs:
       - name: Formatting check
         run: |
               source .venv/bin/activate
+              echo -n "isort version:"
+              isort --version
+              black --version
+              flake8 --version
+              mypy --version
               make check
         shell: bash
 

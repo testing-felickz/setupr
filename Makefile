@@ -5,12 +5,12 @@ install: ## Install the poetry environment
 
 format: ## Format code using isort and black.
 	@echo "🚀 Formatting code: Running isort and black"
-	@isort .
+	@isort --profile black .
 	@black .
 
 check: ## Check code formatting using isort, black, flake8 and mypy.
 	@echo "🚀 Checking code formatting: Running isort"
-	@isort --check-only --diff .
+	@isort --profile black --check-only --diff .
 	@echo "🚀 Checking code formatting: Running black"
 	@black --check .
 	@echo "🚀 Checking code formatting: Running flake8"
@@ -21,6 +21,7 @@ check: ## Check code formatting using isort, black, flake8 and mypy.
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest & coverage"
 	@coverage run -m pytest --doctest-modules
+	@coverage combine
 	@coverage report -m
 
 build: clean-build ## Build wheel file using poetry

@@ -40,7 +40,7 @@ index. The former is the most cumbersome, whereas the latter is much more work
 than just using [pypi](https://pypi.org/).
 
 * [X] GPG: Install and setup then uploads the Worldr GPG key -- if needed.
-* [ ] Downloads & verify the infrastructure installation script.
+* [X] Downloads & verify the infrastructure installation script.
 * [ ] Runs the debug script(s).
 * [ ] Runs all pre-flight checks with [goss](https://github.com/aelsabbahy/goss) -- if needed.
 * [ ] Backup and restore.
