@@ -4,7 +4,6 @@
 .. code-block:: bash
   :linenos:
       pytest -o log_cli=true tests/test_get_url.py -k test_XXX
-
 """
 import logging
 from pathlib import Path

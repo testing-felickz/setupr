@@ -43,13 +43,14 @@ build-and-publish: build publish ## Build and publish.
 docs-test: ## Test if documentation can be built without warnings or errors
 	@mkdocs build -s
 
+.PHONY: docs
 docs: ## Build and serve the documentation
 	@mkdocs serve
 
-.PHONY: docs
+bandit: ## Runs security concerns.
+	@bandit --verbose --recursive drakkar
 
 .PHONY: help
-
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 

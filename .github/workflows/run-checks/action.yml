@@ -17,6 +17,12 @@ runs:
               make check
         shell: bash
 
+      - name: Security (banbdit) check
+        run: |
+          source .venv/bin/activate
+          make bandit
+        shell: bash
+
       - name: Test with pytest
         run: |
               source .venv/bin/activate

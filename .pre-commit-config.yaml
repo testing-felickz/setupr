@@ -14,11 +14,11 @@ repos:
 #     __________________
 # ___/ Python specific. \______________________________________________________
 - repo: https://github.com/psf/black
-  rev: 22.3.0
+  rev: 22.6.0
   hooks:
   - id: black
 - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-  rev: v1.2.4
+  rev: v1.3.0
   exclue: ^/docs/requirements.md
   hooks:
   - id: python-safety-dependencies-check
@@ -43,7 +43,7 @@ repos:
   rev: v1.0.6
   hooks:
   - id: python-bandit-vulnerability-check
-    args: [--verbose, --ini, .banditrc, -ll, --skip, 'B321,B402', --recursive, src/lib]
+    args: [--verbose, --ini, .banditrc, --recursive, drakkar]
 #     ______
 # ___/ BASH \__________________________________________________________________
 - repo: https://github.com/lovesegfault/beautysh
@@ -76,7 +76,7 @@ repos:
 #     ________________
 # ___/ GHA linting    \________________________________________________________
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.16.1
+  rev: 0.17.0
   hooks:
   - id: check-jsonschema
     name: "Check GitHub Workflows"

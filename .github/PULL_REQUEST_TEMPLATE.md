@@ -18,6 +18,6 @@
 
 :pray: Check(s) to perform:
 
-- [X] Ensure the title complies with [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+- [ ] Ensure the title complies with [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 :heart: Thank you!
