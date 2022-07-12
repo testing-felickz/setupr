@@ -76,6 +76,9 @@ class Downloader:
         elif what in ["debug"]:
             self._log.info("Downloading debug script")
             return self._get_files("worldr-debug", version)
+        elif what in ["backup"]:
+            self._log.info("Downloading backup script")
+            return self._get_files("backup-restore", version)
         else:
             self._log.warning("Option %s not supported", what)
             return False

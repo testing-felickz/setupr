@@ -5,11 +5,25 @@ import pytest
 import requests
 
 from drakkar.get_url import Downloader
-from drakkar.pre_flight import GOSS_VERSION, SHA256SUM
+from drakkar.pre_flight import (
+    GOSS_EXE,
+    GOSS_URL,
+    GOSS_VERSION,
+    SHA256SUM,
+    URL_BASE_CHECKS,
+)
 
 
 @pytest.mark.slow
-def test_get_real_instgall_script():
+@pytest.mark.parametrize(
+    "what,version,basename",
+    [
+        ("install", "v3.6.1", "worldr-install-v3.6.1"),
+        ("debug", "v0.10.0", "worldr-debug-v0.10.0"),
+        ("backup", "v3.7.9", "backup-restore-v3.7.9"),
+    ],
+)
+def test_get_real_scripts(what, version, basename):
     """This does it all for real, iff we have the PGP key & access to the
     internet.
 
@@ -29,19 +43,27 @@ def test_get_real_instgall_script():
         )
 
     # Call.
-    assert sut.get("install", "v3.6.1") is True
+    assert sut.get(f"{what}", f"{version}") is True
 
     # Tidy up.
-    if not Path("worldr-install-v3.6.1.sh").is_file():  # pragma: no cover
+    if not Path(f"{basename}.sh").is_file():  # pragma: no cover
         pytest.fail("The script was not downloaded.")
-    Path("worldr-install-v3.6.1.sh").unlink()
-    if not Path("worldr-install-v3.6.1.sig").is_file():  # pragma: no cover
+    Path(f"{basename}.sh").unlink()
+    if not Path(f"{basename}.sig").is_file():  # pragma: no cover
         pytest.fail("The signature file was not downloaded.")
-    Path("worldr-install-v3.6.1.sig").unlink()
+    Path(f"{basename}.sig").unlink()
 
 
 @pytest.mark.slow
-def test_fetch_goss():
+@pytest.mark.parametrize(
+    "what, url",
+    [
+        ("goss", f"{GOSS_URL}/{GOSS_VERSION}/{GOSS_EXE}"),
+        ("infrastructure", f"{URL_BASE_CHECKS}/goss-infrastructure.yaml"),
+        ("security", f"{URL_BASE_CHECKS}/goss-security.yaml"),
+    ],
+)
+def test_fetch_goss(what, url):
     """This does it all for real, iff we have access to the internet.
 
     The test should tidy after itself.
@@ -53,14 +75,7 @@ def test_fetch_goss():
         pytest.fail("No internet connection.")
 
     sut = Downloader()
-    assert (
-        sut.fetch(
-            f"https://github.com/aelsabbahy/goss/releases/download/{GOSS_VERSION}/goss-linux-amd64",  # noqa
-            "goss-linux-amd64",
-            SHA256SUM["goss"],
-        )
-        is True
-    )
-    if not Path("goss-linux-amd64").is_file():  # pragma: no cover
-        pytest.fail("goss was not downloaded.")
-    Path("goss-linux-amd64").unlink()
+    assert sut.fetch(f"{url}", f"{what}", SHA256SUM[f"{what}"]) is True
+    if not Path(f"{what}").is_file():  # pragma: no cover
+        pytest.fail(f"{what} was not downloaded.")
+    Path(f"{what}").unlink()

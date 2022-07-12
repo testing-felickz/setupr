@@ -106,6 +106,9 @@ def downloader():
         ("_get_files", "debug", True, True),
         ("_get_files", "debug", False, False),
         ("_get_files", "Elden Ring", True, False),
+        ("_get_files", "backup", True, True),
+        ("_get_files", "backup", False, False),
+        ("_get_files", "Elden Ring", True, False),
     ],
 )
 def test_downloader_get_files(downloader, func, what, returned, expected):

@@ -43,7 +43,7 @@ than just using [pypi](https://pypi.org/).
 * [X] Downloads & verify the infrastructure installation script.
 * [X] Downloads & verify the infrastructure debug script.
 * [X] Runs all pre-flight checks with [goss](https://github.com/aelsabbahy/goss) -- if needed.
-* [ ] Backup and restore.
+* [X] Backup and restore.
 * [ ] Easy Vault credentials access for first time: backups!
 
 All these steps can have (unit? BDD?) tests so we can be sure they work as
