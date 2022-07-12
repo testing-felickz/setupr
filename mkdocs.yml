@@ -7,6 +7,7 @@ site_author: Dr Yann Golanski
 nav:
   - Home: index.md
   - Modules: modules.md
+  - ToDo: to-do.md
 plugins:
   - search
   - mkdocstrings:

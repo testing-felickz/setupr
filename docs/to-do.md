@@ -41,8 +41,8 @@ than just using [pypi](https://pypi.org/).
 
 * [X] GPG: Install and setup then uploads the Worldr GPG key -- if needed.
 * [X] Downloads & verify the infrastructure installation script.
-* [ ] Runs the debug script(s).
-* [ ] Runs all pre-flight checks with [goss](https://github.com/aelsabbahy/goss) -- if needed.
+* [X] Downloads & verify the infrastructure debug script.
+* [X] Runs all pre-flight checks with [goss](https://github.com/aelsabbahy/goss) -- if needed.
 * [ ] Backup and restore.
 * [ ] Easy Vault credentials access for first time: backups!
 

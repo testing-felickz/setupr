@@ -53,7 +53,7 @@ def test_get_file_success():
         m.get(url, text="resp")
         mocked_open = mock_open()
         with patch("drakkar.get_url.open", mocked_open):
-            get_file("test")
+            get_file(url, "test")
             mocked_open.assert_called_once_with(
                 take_backup(Path.cwd() / Path("test")), "wb"
             )
@@ -66,7 +66,7 @@ def test_get_file_http_failure():
         mocked_open = mock_open()
         with patch("drakkar.get_url.open", mocked_open):
             with pytest.raises(requests.exceptions.HTTPError) as exc_info:
-                get_file("test")
+                get_file(url, "test")
             exception_raised = exc_info.value
             assert "404 Client Error" in exception_raised.args[0]
             assert mocked_open.called is False
@@ -80,7 +80,7 @@ def test_get_file_OS_error():
         mocked_open.side_effect = Exception("Boom!")
         with patch("drakkar.get_url.open", mocked_open):
             with pytest.raises(Exception) as exc_info:
-                get_file("test")
+                get_file(url, "test")
             exception_raised = exc_info.value
             assert "Boom!" in exception_raised.args[0]
             mocked_open.assert_called_once_with(
@@ -114,82 +114,52 @@ def test_downloader_get_files(downloader, func, what, returned, expected):
         assert downloader.get(what, "v1.2.3") is expected
 
 
-@pytest.mark.parametrize("what", [("install", "debug")])
-def test_get_files(what, downloader):
+@pytest.mark.parametrize(
+    "sig,error,expected",
+    [
+        (True, None, True),
+        (True, OSError("BooM"), False),
+        (True, requests.exceptions.RequestException, False),
+        (False, None, False),
+        (False, OSError, False),
+        (False, requests.exceptions.RequestException, False),
+    ],
+)
+def test_get_files(sig, error, expected, downloader):
     with patch("drakkar.get_url.get_file") as mocked_get_file:
-        mocked_get_file.return_value = True
-        downloader._gpg.validate_worldr_signature = MagicMock(
-            return_value=True
-        )
-        assert downloader._get_files(f"{what}", "v1.2.3") is True
-        mocked_get_file.assert_any_call(f"{what}-v1.2.3.sh")
-        mocked_get_file.assert_any_call(f"{what}-v1.2.3.sig")
-        downloader._gpg.validate_worldr_signature.assert_called()
+        # This can override the return value if error is not None.
+        mocked_get_file.side_effect = error
+        downloader._gpg.validate_worldr_signature = MagicMock(return_value=sig)
+        assert downloader._get_files("test", "v1.2.3") is expected
 
 
-@pytest.mark.parametrize("what", [("install", "debug")])
-def test_get_files_bad_signature(what, downloader):
+@pytest.mark.parametrize(
+    "hash,error,expected",
+    [
+        (
+            "4362bac71d971fc7d7b69a757de6fbcb5e1c513b393609043cae67b5341bd4af",
+            None,
+            True,
+        ),
+        (
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            None,
+            False,
+        ),
+        (
+            "4362bac71d971fc7d7b69a757de6fbcb5e1c513b393609043cae67b5341bd4af",
+            OSError,
+            False,
+        ),
+        (
+            "4362bac71d971fc7d7b69a757de6fbcb5e1c513b393609043cae67b5341bd4af",
+            requests.exceptions.RequestException,
+            False,
+        ),
+    ],
+)
+def test_fetch(hash, error, expected, downloader):
+    dst = Path(__file__).parent / "charon-lord-dunsany.txt"
     with patch("drakkar.get_url.get_file") as mocked_get_file:
-        mocked_get_file.return_value = True
-        downloader._gpg.validate_worldr_signature = MagicMock(
-            return_value=False
-        )
-        assert downloader._get_files(f"{what}", "v1.2.3") is False
-        mocked_get_file.assert_any_call(f"{what}-v1.2.3.sh")
-        mocked_get_file.assert_any_call(f"{what}-v1.2.3.sig")
-        downloader._gpg.validate_worldr_signature.assert_called()
-
-
-@pytest.mark.parametrize("what", [("install", "debug")])
-def test_get_files_request_exception(what, downloader):
-    with patch("drakkar.get_url.get_file") as mocked_get_file:
-        mocked_get_file.side_effect = requests.exceptions.RequestException
-        downloader._gpg.validate_worldr_signature = MagicMock(
-            return_value=True
-        )
-        assert downloader._get_files(f"{what}", "v1.2.3") is False
-        mocked_get_file.assert_called_once_with(f"{what}-v1.2.3.sh")
-        downloader._gpg.validate_worldr_signature.assert_not_called()
-
-
-@pytest.mark.parametrize("what", [("install", "debug")])
-def test_get_files_OS_exception(what, downloader):
-    with patch("drakkar.get_url.get_file") as mocked_get_file:
-        mocked_get_file.side_effect = OSError("BooM")
-        downloader._gpg.validate_worldr_signature = MagicMock(
-            return_value=True
-        )
-        assert downloader._get_files(f"{what}", "v1.2.3") is False
-        mocked_get_file.assert_called_once_with(f"{what}-v1.2.3.sh")
-        downloader._gpg.validate_worldr_signature.assert_not_called()
-
-
-def test_do_it_for_real():
-    """This does it all for real, iff we have the PGP key & access to the
-    internet.
-
-    The test should tidy after itself.
-    """
-    # Check if we can connect to the Internet.
-    try:
-        requests.head("http://www.google.com/", timeout=1)
-    except requests.ConnectionError:  # pragma: no cover
-        pytest.fail("No internet connection.")
-
-    # Check that we have a PGP key.
-    sut = Downloader()
-    if not sut._gpg.worldr_key_exists():  # pragma: no cover
-        pytest.skip(
-            "Worldr PGP key is not found, therefore this test cannot run."
-        )
-
-    # Call.
-    assert sut.get("install", "v3.6.1") is True
-
-    # Tidy up.
-    if not Path("worldr-install-v3.6.1.sh").is_file():  # pragma: no cover
-        pytest.fail("The script was not downloaded.")
-    Path("worldr-install-v3.6.1.sh").unlink()
-    if not Path("worldr-install-v3.6.1.sig").is_file():  # pragma: no cover
-        pytest.fail("The signature file was not downloaded.")
-    Path("worldr-install-v3.6.1.sig").unlink()
+        mocked_get_file.side_effect = error
+        assert downloader.fetch("/dev/null", dst.as_posix(), hash) is expected

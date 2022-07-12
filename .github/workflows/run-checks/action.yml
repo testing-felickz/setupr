@@ -6,25 +6,34 @@ runs:
     using: 'composite'
     steps:
 
-      - name: Formatting check
+      - name: "Formatting checks"
         run: |
               source .venv/bin/activate
-              echo -n "isort version:"
-              isort --version
-              black --version
-              flake8 --version
-              mypy --version
-              make check
+              task check-isort
+              task check-black
+              task check-flake8
         shell: bash
 
-      - name: Security (banbdit) check
-        run: |
-          source .venv/bin/activate
-          make bandit
-        shell: bash
-
-      - name: Test with pytest
+      - name: "Type hinting check"
         run: |
               source .venv/bin/activate
-              make test
+              task check-mypy
+        shell: bash
+
+      - name: "Documentation check"
+        run: |
+              source .venv/bin/activate
+              task check-docs
+        shell: bash
+
+      - name: "Securiuty check"
+        run: |
+              source .venv/bin/activate
+              task check-bandit
+        shell: bash
+
+      - name: "Test with pytest"
+        run: |
+              source .venv/bin/activate
+              task tests
         shell: bash

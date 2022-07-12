@@ -18,9 +18,13 @@ check: ## Check code formatting using isort, black, flake8 and mypy.
 	@echo "🚀 Checking code formatting: Running mypy"
 	@mypy .
 
+test-fast:  ## Test the code with pytest, skipping slow tests.
+	@echo "🚀 Testing code: Running pytest"
+	@pytest --doctest-modules
+
 test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest & coverage"
-	@coverage run -m pytest --doctest-modules
+	@coverage run -m pytest --doctest-modules --slow
 	@coverage combine
 	@coverage report -m
 

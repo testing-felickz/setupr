@@ -12,19 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Check out
+      - name: "Check out"
         uses: actions/checkout@v3
 
-      - name: Set up the environment
+      - name: "Set up the environment"
         uses: ./.github/workflows/setup-poetry-env
 
-      - name: Run checks
-        uses: ./.github/workflows/run-checks
+      - name: "Install Task"
+        uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GH_TOKEN }}
+          version: 3.x
 
-      - name: Documentation Test
-        run: |
-          source .venv/bin/activate
-          make docs-test
+      - name: "Run checks"
+        uses: ./.github/workflows/run-checks
 
   tox:
     runs-on: ubuntu-latest

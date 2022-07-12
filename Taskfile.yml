@@ -1,0 +1,113 @@
+---
+# https://taskfile.dev/#/
+version: "3"
+
+tasks:
+  venv:
+    desc: "Create the virtual environment via poetry"
+    cmds:
+      - poetry install
+    source:
+      - pyproject.toml
+      - poetry.lock
+      - poetry.toml
+    generates:
+      - .venv/bin/activate
+    status:
+      - test -f .venv/bin/activate
+    method: checksum
+  activate:
+    desc: "Activates the virtual environment if needed"
+    deps: ["venv"]
+    cmds:
+      - source .venv/bin/activate
+    status:
+      - test ! -z $VIRTUAL_ENV
+  tests-fast:
+    desc: "run all the fast tests, no coverage"
+    deps: ["activate"]
+    cmds:
+      - pytest --doctest-modules --verbose
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  tests:
+    desc: "run all the tests and coverage"
+    cmds:
+      - coverage run -m pytest --doctest-modules --slow
+      - coverage combine
+      - coverage report -m
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  coverage-html:
+    desc: "Generates an HTML coverage report"
+    deps: ["tests"]
+    cmds:
+      - coverage html
+      - xdg-open ./htmlcov/index.html
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+    generates:
+      - htmlcov/index.html
+  format:
+    desc: "Formates the code"
+    cmds:
+      - isort --profile black .
+      - black .
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  check-isort:
+    desc: "Isort checks"
+    cmds:
+      - isort --profile black --check-only --diff .
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  check-black:
+    desc: "Black checks"
+    cmds:
+      - black --check .
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  check-flake8:
+    desc: "Flake8 checks"
+    cmds:
+      - flake8 .
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  check-mypy:
+    desc: "Mypy checks"
+    cmds:
+      - mypy .
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+  check-docs:
+    desc: "Checks documentation"
+    cmds:
+      - mkdocs build -s
+    sources:
+      - drakkar/*.py
+      - tests/*.py
+      - mkdocs.yml
+      - docs/**/*.md
+  check-bandit:
+    desc: "Bandit security checks"
+    cmds:
+      - bandit --verbose --recursive drakkar
+    sources:
+      - drakkar/*.py
+  check:
+    desc: "Runs all the checks"
+    deps: ["format", "check-isort", "check-black", "check-flake8", "check-mypy", "check-docs", "check-bandit"]
+  docs:
+    desc: "Runs a mkdocs servedr on port 8000"
+    cmds:
+      - mkdocs serve
+    sources:
+      - docs/**/*
