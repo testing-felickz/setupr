@@ -166,3 +166,8 @@ cython_debug/
 
 # Taskfile.
 .task/
+
+# Goss, in case this runs…
+goss-infrastructure.yaml
+goss-linux-amd64
+goss-security.yaml

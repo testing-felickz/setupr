@@ -56,14 +56,22 @@ def test_get_real_scripts(what, version, basename):
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
-    "what, url",
+    "file, what, url",
     [
-        ("goss", f"{GOSS_URL}/{GOSS_VERSION}/{GOSS_EXE}"),
-        ("infrastructure", f"{URL_BASE_CHECKS}/goss-infrastructure.yaml"),
-        ("security", f"{URL_BASE_CHECKS}/goss-security.yaml"),
+        ("goss-linux-amd64", "goss", f"{GOSS_URL}/{GOSS_VERSION}/{GOSS_EXE}"),
+        (
+            "goss-infrastructure.yaml",
+            "infrastructure",
+            f"{URL_BASE_CHECKS}/goss-infrastructure.yaml",
+        ),
+        (
+            "goss-security.yaml",
+            "security",
+            f"{URL_BASE_CHECKS}/goss-security.yaml",
+        ),
     ],
 )
-def test_fetch_goss(what, url):
+def test_fetch_goss(file, what, url):
     """This does it all for real, iff we have access to the internet.
 
     The test should tidy after itself.
@@ -75,7 +83,7 @@ def test_fetch_goss(what, url):
         pytest.fail("No internet connection.")
 
     sut = Downloader()
-    assert sut.fetch(f"{url}", f"{what}", SHA256SUM[f"{what}"]) is True
-    if not Path(f"{what}").is_file():  # pragma: no cover
-        pytest.fail(f"{what} was not downloaded.")
-    Path(f"{what}").unlink()
+    assert sut.fetch(f"{url}", f"{file}", SHA256SUM[f"{file}"]) is True
+    if not Path(f"{file}").is_file():  # pragma: no cover
+        pytest.fail(f"{file} was not downloaded.")
+    Path(f"{file}").unlink()

@@ -32,6 +32,12 @@ runs:
               task check-bandit
         shell: bash
 
+      - name: "Cyclomatic complexity check"
+        run: |
+              source .venv/bin/activate
+              task check-radon
+        shell: bash
+
       - name: "Test with pytest"
         run: |
               source .venv/bin/activate

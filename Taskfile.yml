@@ -27,14 +27,16 @@ tasks:
     desc: "run all the fast tests, no coverage"
     deps: ["activate"]
     cmds:
-      - pytest --doctest-modules --verbose
+      - coverage run -m pytest --doctest-modules
+      - coverage combine
+      - coverage report -m
     sources:
       - drakkar/*.py
       - tests/*.py
   tests:
     desc: "run all the tests and coverage"
     cmds:
-      - coverage run -m pytest --doctest-modules --slow
+      - coverage run --concurrency=thread -m pytest --doctest-modules --slow
       - coverage combine
       - coverage report -m
     sources:
@@ -102,12 +104,29 @@ tasks:
       - bandit --verbose --recursive drakkar
     sources:
       - drakkar/*.py
+  check-radon:
+    desc: "Radon checks"
+    cmds:
+      - radon cc --show-complexity --average drakkar/*.py
+      - radon mi drakkar/*.py
+    sources:
+      - drakkar/*.py
   check:
     desc: "Runs all the checks"
-    deps: ["format", "check-isort", "check-black", "check-flake8", "check-mypy", "check-docs", "check-bandit"]
+    deps: ["check-isort", "check-black", "check-flake8", "check-mypy", "check-docs", "check-bandit", "check-radon"]
   docs:
     desc: "Runs a mkdocs servedr on port 8000"
     cmds:
       - mkdocs serve
     sources:
       - docs/**/*
+  build:
+    desc: "Generates a distribution files"
+    cmds:
+      - poetry build --verbose
+    sources:
+      - docs/**/*
+      - drakkar/**/*
+      - tests/**/*
+    generates:
+      - dist/**/*

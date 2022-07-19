@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import pathlib
 import stat
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
 
 import pytest
-from plumbum import local
+from plumbum import ProcessExecutionError, local
 
 from drakkar.get_url import Downloader
 from drakkar.pre_flight import PreFlight
@@ -99,21 +99,48 @@ def test_run(is_file, retcode, mock_preflight):
         "drakkar.pre_flight.PreFlight.goss", new_callable=PropertyMock
     ) as mock_goss:
         with patch.object(pathlib.Path, "is_file", lambda _: is_file):
-            turtle = Mock()
-            turtle.run = Mock(return_value=(retcode, "stdout", "stderr"))
-            mgoss = MagicMock(
-                spec=local, return_value=Mock(return_value=turtle)
-            )
+            mgoss = MagicMock(spec=local)
+            mgoss.run = Mock(return_value=(retcode, "", ""))
             mock_goss.return_value = mgoss
             mock_preflight._downloader.fetch = Mock()
             assert mock_preflight._run("security") == retcode
-            mgoss.assert_called_once_with(
-                "-g",
-                (pathlib.Path.home() / "goss-security.yaml").as_posix(),
-                "validate",
-                "--format",
-                "documentation",
-                "--no-color",
+            mgoss.run.assert_called_once_with(
+                (
+                    "-g",
+                    (pathlib.Path.home() / "goss-security.yaml").as_posix(),
+                    "validate",
+                    "--format",
+                    "documentation",
+                    "--no-color",
+                )
             )
             # If is_file is true, then we do not need to fetch it!
-            assert mock_preflight._downloader.fetch is not is_file
+            assert mock_preflight._downloader.fetch.called is not is_file
+
+
+@patch("drakkar.pre_flight.PreFlight.goss", new_callable=PropertyMock)
+@patch("drakkar.pre_flight.take_backup")
+def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
+    mopen = mock_open()
+    with patch("drakkar.pre_flight.open", mopen):
+        with patch.object(pathlib.Path, "is_file", lambda _: True):
+            m_take_backup.return_value = "xUnitTest"
+            mgoss = MagicMock(spec=local)
+            mgoss.run = Mock(side_effect=ProcessExecutionError("", 1, "", ""))
+            mock_goss.return_value = mgoss
+            mock_preflight._downloader.fetch = Mock()
+            assert mock_preflight._run("security") == 1
+            mgoss.run.assert_called_once_with(
+                (
+                    "-g",
+                    (pathlib.Path.home() / "goss-security.yaml").as_posix(),
+                    "validate",
+                    "--format",
+                    "documentation",
+                    "--no-color",
+                )
+            )
+            # If is_file is true, then we do not need to fetch it!
+            assert mock_preflight._downloader.fetch.called is False
+            assert m_take_backup.called
+            mopen.assert_called_once_with("xUnitTest", "w")

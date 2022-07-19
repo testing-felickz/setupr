@@ -1,22 +1,61 @@
 # -*- coding: utf-8 -*-
 import re
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
+from glob import glob
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import ANY, MagicMock, Mock, patch
 
 import gnupg
 import pytest
 import requests
 import requests_mock
+
+# import requests_mock
 from pendulum.parser import parse
 from pendulum.parsing.exceptions import ParserError
+from rich.progress import TaskID
 
-from drakkar.get_url import (
-    WORLDR_URL_INSTALL,
-    Downloader,
-    get_file,
-    take_backup,
-)
+from drakkar.get_url import Downloader, copy_url, download, take_backup
+
+
+@pytest.mark.parametrize("is_set", [True, False])
+@patch("drakkar.get_url.done_event")
+@patch("drakkar.get_url.progress")
+def test_copy_url(mocked_progress, mocked_done_event, is_set):
+    mocked_done_event.is_set = Mock(return_value=is_set)  # Branch coverage.
+    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+        with requests_mock.Mocker() as mocked:
+            url = "https://worldr.com/index.html"
+            mocked.get(url, text="resp", headers={"content-length": "13"})
+            dst = tmpdirname + "/index.html"
+            copy_url(MagicMock(spec=TaskID), url, dst)
+            assert mocked_progress.start_task.called
+            assert mocked_progress.update.called
+
+
+def test_download():
+    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+        with patch(
+            "drakkar.get_url.ThreadPoolExecutor"
+        ) as mocked_ThreadPoolExecutor:
+            pool = MagicMock(spec=ThreadPoolExecutor)
+            pool.submit = Mock()
+            mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
+                return_value=pool
+            )
+
+            url = "https://worldr.com/index.html"
+            download(
+                [
+                    url,
+                ],
+                tmpdirname,
+            )
+
+            pool.submit.assert_called_once_with(
+                ANY, 0, url, tmpdirname + "/index.html"
+            )
 
 
 def test_take_backup():
@@ -24,12 +63,16 @@ def test_take_backup():
         file = Path(tmpdirname, "test.txt")
         with open(file, "w") as fp:
             fp.write("created temporary file 0\n")
-        bak = take_backup(file).as_posix()
+        assert take_backup(file) == file
+        all_files = glob(f"{tmpdirname}/test*.txt")
+        assert len(all_files) == 1, "There should be only one…"
         date_string = re.findall(
-            r"_[0-9]{4}-[0-9]{2}-[0-9]{2}T.*\.", bak, flags=re.IGNORECASE
+            r"_[0-9]{4}-[0-9]{2}-[0-9]{2}T.*\.",
+            all_files[0],
+            flags=re.IGNORECASE,
         )[0][1:-1]
-        assert bak.startswith(f"{tmpdirname}/test_")
-        assert bak.endswith(".txt")
+        assert all_files[0].startswith(f"{tmpdirname}/test_")
+        assert all_files[0].endswith(".txt")
         try:
             parse(date_string)
             # If we are here, then there is an ISO8601 compliant string in the
@@ -45,47 +88,6 @@ def test_take_backup_no_need():
     sut = Path("/file/does/not/exits/ever/no/really/it/does/not")
     bak = take_backup(sut)
     assert bak is sut
-
-
-def test_get_file_success():
-    with requests_mock.Mocker() as m:
-        url = f"{WORLDR_URL_INSTALL}/test"
-        m.get(url, text="resp")
-        mocked_open = mock_open()
-        with patch("drakkar.get_url.open", mocked_open):
-            get_file(url, "test")
-            mocked_open.assert_called_once_with(
-                take_backup(Path.cwd() / Path("test")), "wb"
-            )
-
-
-def test_get_file_http_failure():
-    with requests_mock.Mocker() as m:
-        url = f"{WORLDR_URL_INSTALL}/test"
-        m.get(url, text="resp", status_code=404)
-        mocked_open = mock_open()
-        with patch("drakkar.get_url.open", mocked_open):
-            with pytest.raises(requests.exceptions.HTTPError) as exc_info:
-                get_file(url, "test")
-            exception_raised = exc_info.value
-            assert "404 Client Error" in exception_raised.args[0]
-            assert mocked_open.called is False
-
-
-def test_get_file_OS_error():
-    with requests_mock.Mocker() as m:
-        url = f"{WORLDR_URL_INSTALL}/test"
-        m.get(url, text="resp")
-        mocked_open = mock_open()
-        mocked_open.side_effect = Exception("Boom!")
-        with patch("drakkar.get_url.open", mocked_open):
-            with pytest.raises(Exception) as exc_info:
-                get_file(url, "test")
-            exception_raised = exc_info.value
-            assert "Boom!" in exception_raised.args[0]
-            mocked_open.assert_called_once_with(
-                take_backup(Path.cwd() / Path("test")), "wb"
-            )
 
 
 @pytest.fixture
@@ -129,11 +131,12 @@ def test_downloader_get_files(downloader, func, what, returned, expected):
     ],
 )
 def test_get_files(sig, error, expected, downloader):
-    with patch("drakkar.get_url.get_file") as mocked_get_file:
+    with patch("drakkar.get_url.download") as mocked_download:
         # This can override the return value if error is not None.
-        mocked_get_file.side_effect = error
+        mocked_download.side_effect = error
         downloader._gpg.validate_worldr_signature = MagicMock(return_value=sig)
         assert downloader._get_files("test", "v1.2.3") is expected
+        assert mocked_download.called
 
 
 @pytest.mark.parametrize(
@@ -163,6 +166,7 @@ def test_get_files(sig, error, expected, downloader):
 )
 def test_fetch(hash, error, expected, downloader):
     dst = Path(__file__).parent / "charon-lord-dunsany.txt"
-    with patch("drakkar.get_url.get_file") as mocked_get_file:
-        mocked_get_file.side_effect = error
+    with patch("drakkar.get_url.download") as mocked_download:
+        mocked_download.side_effect = error
         assert downloader.fetch("/dev/null", dst.as_posix(), hash) is expected
+        assert mocked_download.called

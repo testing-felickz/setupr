@@ -44,7 +44,9 @@ than just using [pypi](https://pypi.org/).
 * [X] Downloads & verify the infrastructure debug script.
 * [X] Runs all pre-flight checks with [goss](https://github.com/aelsabbahy/goss) -- if needed.
 * [X] Backup and restore.
-* [ ] Easy Vault credentials access for first time: backups!
+* [X] Easy Vault credentials access for first time: backups!
+* [ ] [Structured logging](https://www.structlog.org/en/stable/).
+* [ ] Pretty output via [rich](https://rich.readthedocs.io/en/stable/introduction.html).
 
 All these steps can have (unit? BDD?) tests so we can be sure they work as
 intended and new changes do not break functionality.

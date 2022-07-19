@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """All the things to do with GPG."""
-import logging
 from pathlib import Path, PurePath
 
 import gnupg  # type: ignore
+import structlog
 
-rlog = logging.getLogger("GPG")
+rlog = structlog.get_logger("GPG")
 
 
 class GPG:
@@ -31,14 +31,15 @@ class GPG:
             Path(__file__).resolve().parent,
             "Worldr-MST-installation-PGP-key.asc",
         )
-        rlog.debug("The path to the key is %s", key)
-        key_data = open(key).read()
+        rlog.debug("The path to the key", path=key)
+        with open(key, "r") as fd:
+            key_data = fd.read()
         import_result = self._gpg.import_keys(key_data)
         if import_result.count == 1:
             fp = import_result.fingerprints[0]
             rlog.info(
-                "PGP key imported successfully. Fingerprint %s",
-                [fp[i : i + 4] for i in range(0, len(fp), 4)],
+                "PGP key imported successfully.",
+                fingerprint=[fp[i : i + 4] for i in range(0, len(fp), 4)],
             )
             self._gpg.trust_keys(
                 import_result.fingerprints[0], "TRUST_ULTIMATE"
@@ -52,8 +53,8 @@ class GPG:
         """Validates a worldr signature."""
         with open(signature, "rb") as stream:
             verified = self._gpg.verify_file(stream, filename)
-            if "signature bad" == verified.status:
-                rlog.error("Signature of %s is bad.", filename)
+            if verified.status == "signature bad":
+                rlog.error("Signature of is bad.", file=filename)
                 return False
-            rlog.info("Signature of %s is good", filename)
+            rlog.info("Signature of is good", file=filename)
             return True
