@@ -6,7 +6,7 @@ from drakkar.gpg import GPG
 from drakkar.pre_flight import PreFlight
 from drakkar.print import wprint
 
-rlog = structlog.get_logger("commands")
+rlog = structlog.get_logger("drakkar.commands")
 
 
 def pgp_key() -> bool:

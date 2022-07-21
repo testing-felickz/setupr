@@ -42,7 +42,7 @@ class PreFlight:
 
     def __init__(self) -> None:
         """Initialisation."""
-        self._log = structlog.get_logger(self.__class__.__name__)
+        self._log = structlog.get_logger("drakkar.pre_flight")
         self._goss = None
         self._downloader = Downloader()
         self._bin = pathlib.Path.home() / "bin"
@@ -77,24 +77,25 @@ class PreFlight:
                 raise CommandNotFound("goss", local.env.path)
         except CommandNotFound as ex:
             self._log.warning("goss not found", error=ex)
-            dst = self._bin / "goss"
+            dst = self._bin / "goss-linux-amd64"
             self._downloader.fetch(
                 f"{GOSS_URL}/{GOSS_VERSION}/{GOSS_EXE}",
-                dst.as_posix(),
+                dst,
                 SHA256SUM["goss-linux-amd64"],
             )
             dst.chmod(stat.S_IRWXU)  # Read, write, and execute by owner.
+            (self._bin / "goss").symlink_to(dst)
             self._goss = local[dst.as_posix()]
         return self._goss
 
     def _fetch_file(self, what: str) -> pathlib.Path:
         """Fetches a file, if needed"""
         name = f"goss-{what}.yaml"
-        check = pathlib.Path.home() / f"{name}"
+        check = pathlib.Path.cwd() / f"{name}"
         if not check.is_file():
             self._downloader.fetch(
                 f"{URL_BASE_CHECKS}/{name}",
-                check.as_posix(),
+                check,
                 SHA256SUM[name],
             )
         return check

@@ -3,6 +3,7 @@
 
 
 """
+import logging
 import signal
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -38,11 +39,10 @@ progress = Progress(
     TimeRemainingColumn(),
 )
 
-rlog = structlog.get_logger("get-url")
+rlog = structlog.get_logger("drakkar.get-url")
 
 CHUNK_SIZE = 8 * 1024
 WORLDR_URL_INSTALL = "https://storage.googleapis.com/worldr-install"
-
 
 done_event = Event()
 
@@ -62,10 +62,14 @@ def handle_sigint(
 signal.signal(signal.SIGINT, handle_sigint)
 
 
-def copy_url(task_id: TaskID, url: str, path: str) -> None:
+def copy_url(task_id: TaskID, url: str, path: str, progress: Progress) -> None:
     """Copy data from a url to a local file."""
     rlog.info("Requesting", url=url)
     response = requests.get(url, stream=True)
+
+    if response.status_code != 200:
+        rlog.warning("URL cannot be downloaded", code=response.status_code)
+        raise requests.exceptions.RequestException()
 
     progress.update(
         task_id, total=int(str(response.headers.get("content-length")))
@@ -82,6 +86,17 @@ def copy_url(task_id: TaskID, url: str, path: str) -> None:
 
 def download(urls: Iterable[str], dest_dir: str) -> None:
     """Download multiple files to the given directory."""
+    progress = Progress(
+        TextColumn("[bold blue]{task.fields[filename]}", justify="right"),
+        BarColumn(bar_width=None),
+        "[progress.percentage]{task.percentage:>3.1f}%",
+        "•",
+        DownloadColumn(),
+        "•",
+        TransferSpeedColumn(),
+        "•",
+        TimeRemainingColumn(),
+    )
     with progress:
         with ThreadPoolExecutor(max_workers=4) as pool:
             for url in urls:
@@ -90,7 +105,14 @@ def download(urls: Iterable[str], dest_dir: str) -> None:
                 task_id = progress.add_task(
                     "download", filename=filename, start=False
                 )
-                pool.submit(copy_url, task_id, url, dest_path.as_posix())
+                future = pool.submit(
+                    copy_url, task_id, url, dest_path.as_posix(), progress
+                )
+                try:
+                    future.result()
+                except Exception as ex:
+                    rlog.error("Download failed", url=url)
+                    raise ex
 
 
 def take_backup(filename: Path) -> Path:
@@ -107,8 +129,7 @@ class Downloader:
     def __init__(self) -> None:
         """Initialize the class."""
         self._gpg = GPG()
-        self._log = structlog.get_logger(self.__class__.__name__)
-        self._log.debug("Downloader Initialized")
+        rlog.debug("Downloader Initialized")
 
     def _get_files(self, what: str, version: str) -> bool:
         """Download and verify some files."""
@@ -127,44 +148,48 @@ class Downloader:
                 (Path.cwd() / signature).as_posix(),
             )
         except requests.exceptions.RequestException as ex:
-            self._log.exception(ex)
-            self._log.error("Could not downlaod script", script=what, error=ex)
+            if logging.root.level <= logging.DEBUG:  # pragma: no cover
+                rlog.exception(ex)
+            rlog.error("Could not downlaod script", script=what, error=ex)
             return False
         except OSError as ex:
-            self._log.exception(ex)
-            self._log.error("Could not write script", script=what, error=ex)
+            if logging.root.level <= logging.DEBUG:  # pragma: no cover
+                rlog.exception(ex)
+            rlog.error("Could not write script", script=what, error=ex)
             return False
 
     def get(self, what: str, version: str) -> bool:
         """Download a file and its signature to verify it."""
         if what in ["install"]:
-            self._log.info("Downloading installation script")
+            rlog.info("Downloading installation script")
             return self._get_files("worldr-install", version)
         elif what in ["debug"]:
-            self._log.info("Downloading debug script")
+            rlog.info("Downloading debug script")
             return self._get_files("worldr-debug", version)
         elif what in ["backup"]:
-            self._log.info("Downloading backup script")
+            rlog.info("Downloading backup script")
             return self._get_files("backup-restore", version)
         else:
-            self._log.warning("Option not supported", option=what)
+            rlog.warning("Option not supported", option=what)
             return False
 
-    def fetch(self, source: str, destination: str, expected_hash: str) -> bool:
+    def fetch(
+        self, source: str, destination: Path, expected_hash: str
+    ) -> bool:
         """Fetches a package from the Internet and verifies it."""
         try:
-            download((source,), Path.cwd().as_posix())
+            download((source,), destination.parent.as_posix())
         except requests.exceptions.RequestException as ex:
-            self._log.exception(ex)
-            self._log.error(
-                "Could not downlaod script", script=source, error=ex
-            )
+            if logging.root.level <= logging.DEBUG:  # pragma: no cover
+                rlog.exception(ex)
+            rlog.error("Could not downlaod script", script=source, error=ex)
             return False
         except OSError as ex:
-            self._log.exception(ex)
-            self._log.error("Could not write script", script=source, error=ex)
+            if logging.root.level <= logging.DEBUG:  # pragma: no cover
+                rlog.exception(ex)
+            rlog.error("Could not write script", script=source, error=ex)
             return False
-        if expected_hash != sha256sum(destination):
-            self._log.error("Wrong hash", file=destination)
+        if expected_hash != sha256sum(destination.as_posix()):
+            rlog.error("Wrong hash", file=destination)
             return False
         return True

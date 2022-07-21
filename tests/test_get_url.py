@@ -14,24 +14,39 @@ import requests_mock
 # import requests_mock
 from pendulum.parser import parse
 from pendulum.parsing.exceptions import ParserError
-from rich.progress import TaskID
+from rich.progress import Progress, TaskID
 
 from drakkar.get_url import Downloader, copy_url, download, take_backup
 
 
 @pytest.mark.parametrize("is_set", [True, False])
 @patch("drakkar.get_url.done_event")
-@patch("drakkar.get_url.progress")
-def test_copy_url(mocked_progress, mocked_done_event, is_set):
+def test_copy_url(mocked_done_event, is_set):
     mocked_done_event.is_set = Mock(return_value=is_set)  # Branch coverage.
     with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
         with requests_mock.Mocker() as mocked:
             url = "https://worldr.com/index.html"
             mocked.get(url, text="resp", headers={"content-length": "13"})
             dst = tmpdirname + "/index.html"
-            copy_url(MagicMock(spec=TaskID), url, dst)
-            assert mocked_progress.start_task.called
-            assert mocked_progress.update.called
+            progress = MagicMock(spec=Progress)
+            copy_url(MagicMock(spec=TaskID), url, dst, progress)
+            assert progress.start_task.called
+            assert progress.update.called
+
+
+@patch("drakkar.get_url.done_event")
+def test_copy_url_RequestException(mocked_done_event):
+    mocked_done_event.is_set = Mock(return_value=False)  # Branch coverage.
+    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+        with requests_mock.Mocker() as mocked:
+            url = "https://worldr.com/index.html"
+            mocked.get(url, text="resp", status_code=400)
+            dst = tmpdirname + "/index.html"
+            progress = MagicMock(spec=Progress)
+            with pytest.raises(requests.exceptions.RequestException):
+                copy_url(MagicMock(spec=TaskID), url, dst, progress)
+            assert not progress.start_task.called
+            assert not progress.update.called
 
 
 def test_download():
@@ -40,7 +55,9 @@ def test_download():
             "drakkar.get_url.ThreadPoolExecutor"
         ) as mocked_ThreadPoolExecutor:
             pool = MagicMock(spec=ThreadPoolExecutor)
-            pool.submit = Mock()
+            fut = Mock()
+            fut.result = Mock()
+            pool.submit = Mock(return_value=fut)
             mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
                 return_value=pool
             )
@@ -54,8 +71,37 @@ def test_download():
             )
 
             pool.submit.assert_called_once_with(
-                ANY, 0, url, tmpdirname + "/index.html"
+                ANY, ANY, url, tmpdirname + "/index.html", ANY
             )
+            assert fut.result.called
+
+
+def test_download_failed():
+    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+        with patch(
+            "drakkar.get_url.ThreadPoolExecutor"
+        ) as mocked_ThreadPoolExecutor:
+            pool = MagicMock(spec=ThreadPoolExecutor)
+            fut = Mock()
+            fut.result = Mock(side_effect=requests.exceptions.RequestException)
+            pool.submit = Mock(return_value=fut)
+            mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
+                return_value=pool
+            )
+
+            url = "https://worldr.com/index.html"
+            with pytest.raises(requests.exceptions.RequestException):
+                download(
+                    [
+                        url,
+                    ],
+                    tmpdirname,
+                )
+
+            pool.submit.assert_called_once_with(
+                ANY, ANY, url, tmpdirname + "/index.html", ANY
+            )
+            assert fut.result.called
 
 
 def test_take_backup():
@@ -168,5 +214,5 @@ def test_fetch(hash, error, expected, downloader):
     dst = Path(__file__).parent / "charon-lord-dunsany.txt"
     with patch("drakkar.get_url.download") as mocked_download:
         mocked_download.side_effect = error
-        assert downloader.fetch("/dev/null", dst.as_posix(), hash) is expected
+        assert downloader.fetch("/dev/null", dst, hash) is expected
         assert mocked_download.called

@@ -50,11 +50,16 @@ def test_goss_version_bad(preflight):
 
     mgoss = MagicMock(side_effect=_side_efect)
     preflight._downloader = MagicMock(spec=Downloader)
-    with patch.object(pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU):
-        with patch("drakkar.pre_flight.local") as mlocal:
-            mlocal.__getitem__.return_value = mgoss
-            assert preflight.goss is mgoss
-            assert preflight._downloader.fetch.called
+    with patch.object(
+        pathlib.Path, "symlink_to", lambda x, _: "goss" in x.as_posix()
+    ):
+        with patch.object(
+            pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU
+        ):
+            with patch("drakkar.pre_flight.local") as mlocal:
+                mlocal.__getitem__.return_value = mgoss
+                assert preflight.goss is mgoss
+                assert preflight._downloader.fetch.called
 
 
 def test_PreFlight_goss_is_cached(preflight):
@@ -107,7 +112,7 @@ def test_run(is_file, retcode, mock_preflight):
             mgoss.run.assert_called_once_with(
                 (
                     "-g",
-                    (pathlib.Path.home() / "goss-security.yaml").as_posix(),
+                    (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
                     "validate",
                     "--format",
                     "documentation",
@@ -133,7 +138,7 @@ def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
             mgoss.run.assert_called_once_with(
                 (
                     "-g",
-                    (pathlib.Path.home() / "goss-security.yaml").as_posix(),
+                    (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
                     "validate",
                     "--format",
                     "documentation",

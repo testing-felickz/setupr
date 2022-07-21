@@ -5,13 +5,13 @@ from pathlib import Path, PurePath
 import gnupg  # type: ignore
 import structlog
 
-rlog = structlog.get_logger("GPG")
+rlog = structlog.get_logger("drakkar.gpg")
 
 
 class GPG:
     """All the things to do with GPG."""
 
-    gpg: gnupg.GPG  # type: ignore
+    # gpg: gnupg.GPG  # type: ignore
     _fingerprint = "935D282626A16D1A0430487D65A277F7800F774C"
 
     def __init__(self) -> None:
@@ -56,5 +56,5 @@ class GPG:
             if verified.status == "signature bad":
                 rlog.error("Signature of is bad.", file=filename)
                 return False
-            rlog.info("Signature of is good", file=filename)
+            rlog.info("Signature of file is good", file=filename)
             return True

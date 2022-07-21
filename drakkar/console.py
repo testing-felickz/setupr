@@ -34,52 +34,146 @@ pre_chain = [
 ]
 
 
-logging.config.dictConfig(
-    {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "plain": {
-                "()": structlog.stdlib.ProcessorFormatter,
-                "processors": [
-                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                    structlog.processors.JSONRenderer(),
-                ],
-                "foreign_pre_chain": pre_chain,
-            },
-            "colored": {
-                "()": structlog.stdlib.ProcessorFormatter,
-                "processors": [
-                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                    structlog.dev.ConsoleRenderer(colors=True),
-                ],
-                "foreign_pre_chain": pre_chain,
-            },
-        },
-        "handlers": {
-            "default": {
-                "level": "DEBUG",
-                "class": "logging.StreamHandler",
-                "formatter": "colored",
-            },
-            "file": {
-                "level": "DEBUG",
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": "drakkar.log",
-                "formatter": "plain",
-                "maxBytes": 5 * 1024 * 1024,
-                "backupCount": 7,
-            },
-        },
-        "loggers": {
-            "": {
-                "handlers": ["default", "file"],
-                "level": "DEBUG",
-                "propagate": True,
-            },
-        },
+def confirgure_logging(log_level: str, verbose: bool) -> None:
+    """Configure all the logging."""
+
+    # Logging levels
+    # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level  # noqa
+    _lvl = {
+        "critical": 50,
+        "error": 40,
+        "warning": 30,
+        "info": 20,
+        "debug": 10,
+        "notset": 0,
     }
-)
+
+    # Structlog processors. Order appears to matter…
+    shared_processors = [
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.format_exc_info,
+        structlog.processors.CallsiteParameterAdder(
+            [
+                structlog.processors.CallsiteParameter.FILENAME,
+                structlog.processors.CallsiteParameter.FUNC_NAME,
+                structlog.processors.CallsiteParameter.LINENO,
+            ]
+        ),
+    ]
+
+    class VerboseFilter(logging.Filter):
+        """Filter log entries on verbose flag."""
+
+        def __init__(self, param: str = "") -> None:
+            self.param = param
+            super()
+
+        def filter(self, _: logging.LogRecord) -> bool:
+            # We do not care about record thus mark it as _.
+            return verbose
+
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "disable_existing_loggers": True,  # tabula raza.
+            "filters": {
+                "myfilter": {
+                    "()": VerboseFilter,
+                    "param": "noshow",
+                }
+            },
+            "formatters": {
+                "plain": {
+                    "()": structlog.stdlib.ProcessorFormatter,
+                    "processors": shared_processors
+                    + [
+                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,  # noqa
+                        structlog.processors.JSONRenderer(),
+                    ],
+                    "foreign_pre_chain": pre_chain,
+                },
+                "colored": {
+                    "()": structlog.stdlib.ProcessorFormatter,
+                    "processors": shared_processors
+                    + [
+                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,  # noqa
+                        structlog.dev.ConsoleRenderer(colors=True),
+                    ],
+                    "foreign_pre_chain": pre_chain,
+                },
+            },
+            "handlers": {
+                "default": {
+                    "level": _lvl[log_level],
+                    "class": "logging.StreamHandler",
+                    "filters": ["myfilter"],
+                    "formatter": "colored",
+                },
+                "file": {
+                    "level": _lvl[log_level],
+                    "class": "logging.handlers.WatchedFileHandler",
+                    "filename": "drakkar.log",
+                    "formatter": "plain",
+                },
+            },
+            # Define all the loggers you want!
+            "loggers": {
+                "drakkar": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "gnupg": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "concurrent": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "plumbum": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "urllib3": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "requests": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "rich": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+                "asyncio": {
+                    "handlers": ["default", "file"],
+                    "level": _lvl[log_level],
+                    "propagate": True,
+                },
+            },
+        }
+    )
+    structlog.configure(
+        processors=shared_processors
+        + [
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],  # type: ignore [arg-type]
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.make_filtering_bound_logger(_lvl[log_level]),
+        cache_logger_on_first_use=True,
+    )
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -186,13 +280,14 @@ def validate_semver(
         ["notset", "debug", "info", "warning", "error", "critical"],
         case_sensitive=False,
     ),
-    help="Chose the logging level from the available options.",
+    help="Chose the logging level from the available options. "
+    "This affect the file logs as well.",
 )
 @click.option(
     "-v", "--version", is_flag=True, help="Print the version and exit"
 )
 @click.option("--verbose", is_flag=True, help="Print the logs to stdout")
-def main(
+def main(  # noqa
     install: click.Option,
     debug: click.Option,
     backup: click.Option,
@@ -210,54 +305,24 @@ def main(
         click.echo(__version__)
         sys.exit(0)
 
-    # Logging levels
-    # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level  # noqa
-    _lvl = {
-        "critical": 50,
-        "error": 40,
-        "warning": 30,
-        "info": 20,
-        "debug": 10,
-        "notset": 0,
-    }
-    if not verbose:  # pragma: no cover
-        # We remove the handlers if we do not want it…
-        logging.getLogger().removeHandler(logging.getLogger().handlers[0])
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.filter_by_level,
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.UnicodeDecoder(),
-            structlog.processors.CallsiteParameterAdder(
-                [
-                    structlog.processors.CallsiteParameter.FILENAME,
-                    structlog.processors.CallsiteParameter.FUNC_NAME,
-                    structlog.processors.CallsiteParameter.LINENO,
-                ]
-            ),
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            # structlog.processors.format_exc_info,  # Pretty exceptions!
-            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
-        ],
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        # wrapper_class=structlog.stdlib.BoundLogger,
-        wrapper_class=structlog.make_filtering_bound_logger(_lvl[log_level]),
-        cache_logger_on_first_use=True,
-    )
+    confirgure_logging(log_level, verbose)
+    logger = structlog.get_logger("drakkar")
+    logger.debug(
+        "All the loggers",
+        loggers=[name for name in logging.root.manager.loggerDict],
+    )  # noqa
 
-    logger = structlog.get_logger("main")
-    # logger.debug("This is a debug message")
-    # logger.info("This is a info message", lvl=log_level)
-    # logger.warning("This is a warn message")
-    # logger.error("This is a error message")
-    # logger.critical("This is a critical message")
-    # sys.exit(0)
+    # logger.debug("ook")
+    # logger.info("BOOM")
+    # logger.warning("monkey")
+    # logger.error("eek")
+
+    # gah = structlog.get_logger("drakkar.gah")
+    # gah.error("urgh")
 
     dlr = Downloader()
+
+    # sys.exit(0)
 
     if install is not None:
         wprint(
@@ -311,3 +376,12 @@ def main(
 
 if __name__ == "__main__":  # pragma: no cover
     main()
+{
+    "event": "stdout reader: <Thread(Thread-2 (_read_data), initial daemon)>",
+    "level": "debug",
+    "logger": "gnupg",
+    "timestamp": "2022-07-21T09:51:53.259904Z",
+    "filename": "gnupg.py",
+    "func_name": "_collect_output",
+    "lineno": 1062,
+}
