@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "GHA"
+      prefix: "chore (GHA):"
     pull-request-branch-name:
       separator: "-"
   - package-ecosystem: "pip"
@@ -18,6 +18,6 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "pip"
+      prefix: "chore (pip):"
     pull-request-branch-name:
       separator: "-"
