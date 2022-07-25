@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drakkar"
-version = "0.0.1"
+version = "0.1.0"
 description = "Drakkar ships the Worldr infrastructure."
 authors = ["Dr Yann Golanski <fyg@worldr.com>"]
 repository = "https://github.com/worldr/drakkar"
