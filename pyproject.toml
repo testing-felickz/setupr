@@ -20,7 +20,7 @@ requests = "^2.28.1"
 pendulum = "^2.1.2"
 plumbum = "^1.7.2"
 sha256sum = "^2022.6.11"
-semver = ">=3.0.0-dev.3"
+semver = ">=2.10,<3"
 structlog = "^21.5.0"
 
 
@@ -42,6 +42,8 @@ requests-mock = "^1.9.3"
 bandit = "^1.7.4"
 pytest-skip-slow = "^0.0.3"
 radon = "^5.1.0"
+commitizen = "^2.28.1"
+python-semantic-release = "7.28.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -108,3 +110,10 @@ addopts = "-ra -q --junit-xml=pytest.xml --last-failed "
 [tool.coverage.run]
 parallel = true
 branch = true
+
+[tool.semantic_release]
+version_toml = "pyproject.toml:tool.poetry.version"
+branch = "main"
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install poetry && poetry build"

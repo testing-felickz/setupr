@@ -1,8 +1,10 @@
-on:
-  release:
-    types: [published]
-    branches: [main]
+# on:
+#   release:
+#     types: [published]
+#     branches: [main]
 
+on: workflow_dispatch
+  
 name: release-main
 
 jobs:
@@ -33,56 +35,93 @@ jobs:
       matrix:
         python-version: ['3.8', '3.9', '3.10']
     steps:
-      - name: Check out
+      - name: "Check out"
         uses: actions/checkout@v3
 
-      - name: Set up the environment
+      - name: "Set up the environment"
         uses: ./.github/workflows/setup-poetry-env
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Test with tox
+      - name: "Test with tox"
         run: |
           source .venv/bin/activate
-          poetry add tox-gh-actions
+          poetry add "tox-gh-actions==v2.9.1"
           tox
 
-  publish:
-      runs-on: ubuntu-latest
-      needs: tox
-      steps:
-
-        - name: Check out
-          uses: actions/checkout@v3
-
-        - name: Set up the environment
-          uses: ./.github/workflows/setup-poetry-env
-
-        - name: Set output
-          id: vars
-          run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-
-        - name: Build and publish
-          run: |
-            source .venv/bin/activate
-            poetry version $RELEASE_VERSION
-            make build-and-publish
-          env:
-            PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-            RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-
-  documentation:
+  release:
+    # https://github.com/relekang/python-semantic-release/issues/311
+    needs: tox
     runs-on: ubuntu-latest
-    needs: publish
+    concurrency: release
+
     steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.PAT }}
+        
+    - name: "Python Semantic Release"
+      uses: relekang/python-semantic-release@v7.29.6
+      with:
+        github_token: ${{ secrets.PAT }}
 
-      - name: Check out
-        uses: actions/checkout@v3
-
-      - name: Set up the environment
-        uses: ./.github/workflows/setup-poetry-env
-
-      - name: Generate documentation
-        run: |
-            source .venv/bin/activate
-            mkdocs gh-deploy --force
+# 
+#
+#    We might need some of these later on. It does not harm being commented out.
+#
+#
+#  publish:
+#      runs-on: ubuntu-latest
+#      needs: tox
+#      steps:
+#
+#        - name: "Check out"
+#          uses: actions/checkout@v3
+#          with:
+#            token: ${{ secrets.PAT }}
+#
+#        - name: "Set up the environment"
+#          uses: ./.github/workflows/setup-poetry-env
+#
+#        - name: "Set output"
+#          id: vars
+#          run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+#
+#        - name: "Build the release"
+#          run: |
+#            source .venv/bin/activate
+#            poetry version $RELEASE_VERSION
+#            task build
+#          env:
+#            RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+#
+#        - uses: stefanzweifel/git-auto-commit-action@v4
+#          with:
+#            add_options: '-u'
+#            status_options: '--untracked-files=no'
+#            commit_message: "chore(release): updated version"
+#
+#        - name: "Publish the release assets"
+#          uses: softprops/action-gh-release@v1
+#          if: startsWith(github.ref, 'refs/tags/')
+#          with:
+#            files: |
+#              dist/drakkar-${{ github.event.inputs.release_tag }}-py3-none-any.whl
+#              dist/drakkar-${{ github.event.inputs.release_tag }}.tar.gz
+# 
+#   documentation:
+#     runs-on: ubuntu-latest
+#     needs: publish
+#     steps:
+# 
+#       - name: "Check out"
+#         uses: actions/checkout@v3
+# 
+#       - name: "Set up the environment"
+#         uses: ./.github/workflows/setup-poetry-env
+# 
+#       - name: "Generate documentation"
+#         run: |
+#             source .venv/bin/activate
+#             mkdocs gh-deploy --force

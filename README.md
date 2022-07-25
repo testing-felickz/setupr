@@ -37,6 +37,18 @@ pre-commit install
 pre-commit install --hook-type commit-msg
 ```
 
+### Conventional commits
+
+You can use [commitizen](https://github.com/commitizen-tools/commitizen) to
+create correct conventional commits if it helps you. If not, the `pre-commit`
+hooks should validate if your commit is correct or not.
+
+More on [conventional
+commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+Note that a GHA should run to make sure that the RP title is a valide
+[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
 ## Testing
 
 ### GnuPG

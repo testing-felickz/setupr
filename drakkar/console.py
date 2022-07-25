@@ -4,9 +4,10 @@ import logging
 import logging.config
 import sys
 import typing
+from typing import Any
 
 import click
-import semver
+import semver  # type: ignore
 import structlog
 from click_help_colors import HelpColorsCommand  # type: ignore
 from rich.traceback import install
@@ -207,14 +208,14 @@ class MutuallyExclusiveOption(click.Option):
 
 def validate_semver(
     ctx: click.core.Context, param: click.Option, value: str
-) -> typing.Union[None, semver.version.Version]:
+) -> typing.Union[None, Any]:
     """Validate the option is semver compliante.
 
     If the option is None, do nothing."""
     if value is None:
         return None
     try:
-        ver = semver.version.VersionInfo.parse(value)
+        ver = semver.VersionInfo.parse(value)
         return ver
     except ValueError as ex:
         raise click.UsageError(f"{value}: {ex}")
