@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 """Wrapper to goss.
 
-This needs to do the following things:
-    [X] - Get goss binary.
-    [X] - Verify goss binary.
-    [X] - Get security checks file.
-    [X] - Get infrastructure checks file.
-    [X] - Run goss, capture output.
-
 Note that plumbum does not have type hints. Please see the bug [Type hints
         for library #334 ](https://github.com/tomerfiliba/plumbum/issues/334)
 for more information.

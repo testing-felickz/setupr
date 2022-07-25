@@ -6,8 +6,10 @@ site_author: Dr Yann Golanski
 
 nav:
   - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Development: development.md
   - Modules: modules.md
-  - ToDo: to-do.md
 plugins:
   - search
   - mkdocstrings:
@@ -23,8 +25,8 @@ theme:
   feature:
     tabs: true
   palette:
-    primary: white
-    accent: blue
+    primary: slate
+    accent: teal
   logo: assets/logo.png
   features:
     - navigation.instant
