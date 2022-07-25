@@ -21,7 +21,7 @@ pendulum = "^2.1.2"
 plumbum = "^1.7.2"
 sha256sum = "^2022.6.11"
 semver = ">=2.10,<3"
-structlog = "^21.5.0"
+structlog = "^22.1.0"
 
 
 [tool.poetry.dev-dependencies]
