@@ -1,8 +1,8 @@
-# Drakkar Modules
+# Setupr Modules
 
-::: drakkar.commands
-::: drakkar.console
-::: drakkar.get_url
-::: drakkar.gpg
-::: drakkar.pre_flight
-::: drakkar.print
+::: setupr.commands
+::: setupr.console
+::: setupr.get_url
+::: setupr.gpg
+::: setupr.pre_flight
+::: setupr.print

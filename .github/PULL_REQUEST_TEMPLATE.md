@@ -19,5 +19,7 @@
 :pray: Check(s) to perform:
 
 - [ ] Ensure the title complies with [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+- [ ] Ensure there are tests, or an explanation as to why they are not needed.
+- [ ] Ensure there is documentation, or an explanation as to why it is not needed.
 
 :heart: Thank you!

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from drakkar.print import wprint
+from setupr.print import wprint
 
 TXT = "I Am Malenia, Blade Of Miquella, And I Have Never Known Defeat."
 TXT_FMT = (

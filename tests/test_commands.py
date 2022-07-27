@@ -3,9 +3,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from drakkar.commands import pgp_key, pre_flight
-from drakkar.gpg import GPG
-from drakkar.pre_flight import PreFlight
+from setupr.commands import pgp_key, pre_flight
+from setupr.gpg import GPG
+from setupr.pre_flight import PreFlight
 
 
 @pytest.mark.parametrize(
@@ -17,7 +17,7 @@ from drakkar.pre_flight import PreFlight
     ],
 )
 def test_pgp_key(key_exists, imported, expected, mock_console):
-    with patch("drakkar.commands.GPG") as m_gpg:
+    with patch("setupr.commands.GPG") as m_gpg:
         mocked = Mock(spec=GPG)
         mocked.worldr_key_exists.return_value = key_exists
         mocked.import_worldr_key.return_value = imported
@@ -36,7 +36,7 @@ def test_pgp_key(key_exists, imported, expected, mock_console):
     ],
 )
 def test_pre_flight(sec, infra, expected, mock_console):
-    with patch("drakkar.commands.PreFlight") as m_pre_flight:
+    with patch("setupr.commands.PreFlight") as m_pre_flight:
         mocked = Mock(spec=PreFlight)
         mocked.security.return_value = sec
         mocked.infrastructure.return_value = infra

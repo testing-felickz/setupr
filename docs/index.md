@@ -1,23 +1,23 @@
-# drakkar
+# setupr
 
-[![Release](https://img.shields.io/github/v/release/worldr/drakkar)](https://img.shields.io/github/v/release/worldr/drakkar)
-[![Build status](https://img.shields.io/github/workflow/status/worldr/drakkar/merge-to-main)](https://img.shields.io/github/workflow/status/worldr/drakkar/merge-to-main)
-[![Commit activity](https://img.shields.io/github/commit-activity/m/worldr/drakkar)](https://img.shields.io/github/commit-activity/m/worldr/drakkar)
-[![License](https://img.shields.io/github/license/worldr/drakkar)](https://img.shields.io/github/license/worldr/drakkar)
+[![Release](https://img.shields.io/github/v/release/worldr/setupr)](https://img.shields.io/github/v/release/worldr/setupr)
+[![Build status](https://img.shields.io/github/workflow/status/worldr/setupr/merge-to-main)](https://img.shields.io/github/workflow/status/worldr/setupr/merge-to-main)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/worldr/setupr)](https://img.shields.io/github/commit-activity/m/worldr/setupr)
+[![License](https://img.shields.io/github/license/worldr/setupr)](https://img.shields.io/github/license/worldr/setupr)
 
-***Drakkar ships the Worldr infrastructure…***
+***Setupr ships the Worldr infrastructure…***
 
-## Drakkar: The New Way
+## Setupr: The New Way
 
 A installing is as simple as running two commands:
 
-1. `pip install drakkar` to install drakkar itself.
-1. `drakkar -i 1.2.3` for installing version `1.2.3`.
+1. `pip install setupr` to install setupr itself.
+1. `setupr -i 1.2.3` for installing version `1.2.3`.
 
-Note that currently drakkar does not execute the installation script. This
+Note that currently setupr does not execute the installation script. This
 feature is coming soon…
 
-![Drakkar](./assets/drakkar-example.gif)
+![Setupr](./assets/setupr-example.gif)
 
 ## The Old Way
 

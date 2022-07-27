@@ -7,9 +7,9 @@ from click.core import Context
 from click.exceptions import UsageError
 from click.testing import CliRunner
 
-from drakkar import __version__
-from drakkar.console import main, validate_semver
-from drakkar.get_url import Downloader
+from setupr import __version__
+from setupr.console import main, validate_semver
+from setupr.get_url import Downloader
 
 SEMVER = "1.2.3"
 
@@ -17,7 +17,7 @@ SEMVER = "1.2.3"
 def test_help():
     runner = CliRunner()
     result = runner.invoke(main, ["--help"])
-    assert "Drakkar ships the Worldr infrastructure" in result.output
+    assert "Setupr ships the Worldr infrastructure" in result.output
 
 
 def test_version():
@@ -102,9 +102,9 @@ def test_verify_semver(input, expected, error):
         ("-i", True, True, True, 0),
     ],
 )
-@patch("drakkar.console.pgp_key")
-@patch("drakkar.console.pre_flight")
-@patch("drakkar.console.Downloader")
+@patch("setupr.console.pgp_key")
+@patch("setupr.console.pre_flight")
+@patch("setupr.console.Downloader")
 def test_console(
     m_downloader,
     m_pre_flight,

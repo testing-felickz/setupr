@@ -7,7 +7,7 @@ from rich.console import Console
 
 @pytest.fixture(autouse=True, scope="package")
 def mock_console():
-    with patch("drakkar.print.Console") as mocked:
+    with patch("setupr.print.Console") as mocked:
         console = MagicMock(spec=Console)
         console.print = MagicMock()
         mocked.return_value = console

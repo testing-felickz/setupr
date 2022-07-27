@@ -42,7 +42,7 @@ repos:
   rev: v1.0.6
   hooks:
   - id: python-bandit-vulnerability-check
-    args: [--verbose, --ini, .banditrc, --recursive, drakkar]
+    args: [--verbose, --ini, .banditrc, --recursive, setupr]
 #     ______
 # ___/ BASH \__________________________________________________________________
 - repo: https://github.com/lovesegfault/beautysh

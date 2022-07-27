@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 import requests
 
-from drakkar.get_url import Downloader
-from drakkar.pre_flight import (
+from setupr.get_url import Downloader
+from setupr.pre_flight import (
     GOSS_EXE,
     GOSS_URL,
     GOSS_VERSION,

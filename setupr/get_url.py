@@ -25,7 +25,7 @@ from rich.progress import (
 )
 from sha256sum import sha256sum
 
-from drakkar.gpg import GPG
+from setupr.gpg import GPG
 
 progress = Progress(
     TextColumn("[bold blue]{task.fields[filename]}", justify="right"),
@@ -39,7 +39,7 @@ progress = Progress(
     TimeRemainingColumn(),
 )
 
-rlog = structlog.get_logger("drakkar.get-url")
+rlog = structlog.get_logger("setupr.get-url")
 
 CHUNK_SIZE = 8 * 1024
 WORLDR_URL_INSTALL = "https://storage.googleapis.com/worldr-install"

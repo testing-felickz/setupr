@@ -17,7 +17,7 @@ from plumbum import (  # type: ignore
     local,
 )
 
-from drakkar.get_url import Downloader, take_backup
+from setupr.get_url import Downloader, take_backup
 
 GOSS_EXE = "goss-linux-amd64"
 GOSS_URL = "https://github.com/aelsabbahy/goss/releases/download"
@@ -35,7 +35,7 @@ class PreFlight:
 
     def __init__(self) -> None:
         """Initialisation."""
-        self._log = structlog.get_logger("drakkar.pre_flight")
+        self._log = structlog.get_logger("setupr.pre_flight")
         self._goss = None
         self._downloader = Downloader()
         self._bin = pathlib.Path.home() / "bin"

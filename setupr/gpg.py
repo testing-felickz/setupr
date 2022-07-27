@@ -5,7 +5,7 @@ from pathlib import Path, PurePath
 import gnupg  # type: ignore
 import structlog
 
-rlog = structlog.get_logger("drakkar.gpg")
+rlog = structlog.get_logger("setupr.gpg")
 
 
 class GPG:

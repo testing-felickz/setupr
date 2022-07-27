@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/worldr/drakkar/issues
+Report bugs at https://github.com/worldr/setupr/issues
 
 If you are reporting a bug, please include:
 
@@ -44,7 +44,7 @@ Submit Feedback
 ~~~~~~~~~~~~~~~
 
 The best way to send feedback is to file an issue at
-https://github.com/worldr/drakkar/issues.
+https://github.com/worldr/setupr/issues.
 
 If you are proposing a new feature:
 
@@ -55,25 +55,25 @@ If you are proposing a new feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `drakkar` for local
+Ready to contribute? Here's how to set up `setupr` for local
 development. Please note this documentation assumes you already have
 `poetry` and `Git` installed and ready to go.
 
-| 1. Fork the `drakkar` repo on GitHub.
+| 1. Fork the `setupr` repo on GitHub.
 
 | 2. Clone your fork locally:
 
    .. code-block:: bash
 
         cd <directory_in_which_repo_should_be_created>
-        git clone git@github.com:YOUR_NAME/drakkar.git
+        git clone git@github.com:YOUR_NAME/setupr.git
 
 
 | 3. Now we need to install the environment. Navigate into the directory
 
    .. code-block:: bash
 
-       cd drakkar
+       cd setupr
 
    If you are using ``pyenv``, select a version to use locally. (See installed versions with ``pyenv versions``)
 

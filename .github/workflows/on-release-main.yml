@@ -107,8 +107,8 @@ jobs:
 #          if: startsWith(github.ref, 'refs/tags/')
 #          with:
 #            files: |
-#              dist/drakkar-${{ github.event.inputs.release_tag }}-py3-none-any.whl
-#              dist/drakkar-${{ github.event.inputs.release_tag }}.tar.gz
+#              dist/setupr-${{ github.event.inputs.release_tag }}-py3-none-any.whl
+#              dist/setupr-${{ github.event.inputs.release_tag }}.tar.gz
 # 
 #   documentation:
 #     runs-on: ubuntu-latest

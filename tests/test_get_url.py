@@ -16,14 +16,14 @@ from pendulum.parser import parse
 from pendulum.parsing.exceptions import ParserError
 from rich.progress import Progress, TaskID
 
-from drakkar.get_url import Downloader, copy_url, download, take_backup
+from setupr.get_url import Downloader, copy_url, download, take_backup
 
 
 @pytest.mark.parametrize("is_set", [True, False])
-@patch("drakkar.get_url.done_event")
+@patch("setupr.get_url.done_event")
 def test_copy_url(mocked_done_event, is_set):
     mocked_done_event.is_set = Mock(return_value=is_set)  # Branch coverage.
-    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
         with requests_mock.Mocker() as mocked:
             url = "https://worldr.com/index.html"
             mocked.get(url, text="resp", headers={"content-length": "13"})
@@ -34,10 +34,10 @@ def test_copy_url(mocked_done_event, is_set):
             assert progress.update.called
 
 
-@patch("drakkar.get_url.done_event")
+@patch("setupr.get_url.done_event")
 def test_copy_url_RequestException(mocked_done_event):
     mocked_done_event.is_set = Mock(return_value=False)  # Branch coverage.
-    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
         with requests_mock.Mocker() as mocked:
             url = "https://worldr.com/index.html"
             mocked.get(url, text="resp", status_code=400)
@@ -50,9 +50,9 @@ def test_copy_url_RequestException(mocked_done_event):
 
 
 def test_download():
-    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
         with patch(
-            "drakkar.get_url.ThreadPoolExecutor"
+            "setupr.get_url.ThreadPoolExecutor"
         ) as mocked_ThreadPoolExecutor:
             pool = MagicMock(spec=ThreadPoolExecutor)
             fut = Mock()
@@ -77,9 +77,9 @@ def test_download():
 
 
 def test_download_failed():
-    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
         with patch(
-            "drakkar.get_url.ThreadPoolExecutor"
+            "setupr.get_url.ThreadPoolExecutor"
         ) as mocked_ThreadPoolExecutor:
             pool = MagicMock(spec=ThreadPoolExecutor)
             fut = Mock()
@@ -105,7 +105,7 @@ def test_download_failed():
 
 
 def test_take_backup():
-    with tempfile.TemporaryDirectory(prefix="drakkar_tests_") as tmpdirname:
+    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
         file = Path(tmpdirname, "test.txt")
         with open(file, "w") as fp:
             fp.write("created temporary file 0\n")
@@ -138,7 +138,7 @@ def test_take_backup_no_need():
 
 @pytest.fixture
 def downloader():
-    with patch("drakkar.gpg.gnupg") as mock_gpg:
+    with patch("setupr.gpg.gnupg") as mock_gpg:
         mock_gpg.return_value = MagicMock(spec=gnupg.GPG)
         sut = Downloader()
         assert isinstance(sut._gpg._gpg, MagicMock)
@@ -177,7 +177,7 @@ def test_downloader_get_files(downloader, func, what, returned, expected):
     ],
 )
 def test_get_files(sig, error, expected, downloader):
-    with patch("drakkar.get_url.download") as mocked_download:
+    with patch("setupr.get_url.download") as mocked_download:
         # This can override the return value if error is not None.
         mocked_download.side_effect = error
         downloader._gpg.validate_worldr_signature = MagicMock(return_value=sig)
@@ -212,7 +212,7 @@ def test_get_files(sig, error, expected, downloader):
 )
 def test_fetch(hash, error, expected, downloader):
     dst = Path(__file__).parent / "charon-lord-dunsany.txt"
-    with patch("drakkar.get_url.download") as mocked_download:
+    with patch("setupr.get_url.download") as mocked_download:
         mocked_download.side_effect = error
         assert downloader.fetch("/dev/null", dst, hash) is expected
         assert mocked_download.called

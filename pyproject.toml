@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "drakkar"
+name = "setupr"
 version = "0.1.0"
-description = "Drakkar ships the Worldr infrastructure."
+description = "Setupr ships the Worldr infrastructure."
 authors = ["Dr Yann Golanski <fyg@worldr.com>"]
-repository = "https://github.com/worldr/drakkar"
-documentation = "https://worldr.github.io/drakkar/"
+repository = "https://github.com/worldr/setupr"
+documentation = "https://worldr.github.io/setupr/"
 readme = "README.md"
 packages = [
-  {include = "drakkar"}
+  {include = "setupr"}
 ]
 
 [tool.poetry.dependencies]
@@ -86,10 +86,10 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
-drakkar = "drakkar.console:main"
+setupr = "setupr.console:main"
 
 [scripts]
-drakkar = "drakkar.console:main"
+setupr = "setupr.console:main"
 
 [tool.pytest.ini_options]
 log_auto_indent = true

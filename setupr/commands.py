@@ -2,11 +2,11 @@
 """Command wrapping other functionalty with useful user output."""
 import structlog
 
-from drakkar.gpg import GPG
-from drakkar.pre_flight import PreFlight
-from drakkar.print import wprint
+from setupr.gpg import GPG
+from setupr.pre_flight import PreFlight
+from setupr.print import wprint
 
-rlog = structlog.get_logger("drakkar.commands")
+rlog = structlog.get_logger("setupr.commands")
 
 
 def pgp_key() -> bool:

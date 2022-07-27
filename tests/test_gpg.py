@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, patch
 import gnupg  # ignore: type
 import pytest
 
-from drakkar.gpg import GPG
+from setupr.gpg import GPG
 
 
 @pytest.fixture
 def mocked_gpg():
-    with patch("drakkar.gpg.gnupg") as mock_gpg:
+    with patch("setupr.gpg.gnupg") as mock_gpg:
         mock_gpg.return_value = MagicMock(spec=gnupg.GPG)
         sut = GPG()
         mock_gpg.GPG.assert_called_once()

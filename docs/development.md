@@ -74,14 +74,14 @@ should be true for most developers. If not, the test is skipped.
 
 ## Logs
 
-If you run drakkar and get files, then you might get a lot of log files. Those
+If you run setupr and get files, then you might get a lot of log files. Those
 are generally safe to remove en mass.
 
 ## Release
 
 There is a GitHub Action that will creeate a [semantic
 release](https://python-semantic-release.readthedocs.io/en/latest/) for
-Drakkar.
+Setupr.
 
 This is why [conventional
 commits](https://www.conventionalcommits.org/en/v1.0.0/) are essential,

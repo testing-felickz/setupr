@@ -1,7 +1,7 @@
-site_name: drakkar
-repo_url: https://github.com/worldr/drakkar
-site_url: https://worldr.github.io/drakkar
-site_description: Drakkar ships the Worldr infrastructure.
+site_name: setupr
+repo_url: https://github.com/worldr/setupr
+site_url: https://worldr.github.io/setupr
+site_description: Setupr ships the Worldr infrastructure.
 site_author: Dr Yann Golanski
 
 nav:

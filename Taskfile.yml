@@ -31,7 +31,7 @@ tasks:
       - coverage combine
       - coverage report -m
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   tests:
     desc: "run all the tests and coverage"
@@ -40,7 +40,7 @@ tasks:
       - coverage combine
       - coverage report -m
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   coverage-html:
     desc: "Generates an HTML coverage report"
@@ -49,7 +49,7 @@ tasks:
       - coverage html
       - xdg-open ./htmlcov/index.html
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
     generates:
       - htmlcov/index.html
@@ -59,58 +59,58 @@ tasks:
       - isort --profile black .
       - black .
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   check-isort:
     desc: "Isort checks"
     cmds:
       - isort --profile black --check-only --diff .
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   check-black:
     desc: "Black checks"
     cmds:
       - black --check .
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   check-flake8:
     desc: "Flake8 checks"
     cmds:
       - flake8 .
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   check-mypy:
     desc: "Mypy checks"
     cmds:
       - mypy .
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
   check-docs:
     desc: "Checks documentation"
     cmds:
       - mkdocs build -s
     sources:
-      - drakkar/*.py
+      - setupr/*.py
       - tests/*.py
       - mkdocs.yml
       - docs/**/*.md
   check-bandit:
     desc: "Bandit security checks"
     cmds:
-      - bandit --verbose --recursive drakkar
+      - bandit --verbose --recursive setupr
     sources:
-      - drakkar/*.py
+      - setupr/*.py
   check-radon:
     desc: "Radon checks"
     cmds:
-      - radon cc --show-complexity --average drakkar/*.py
-      - radon mi drakkar/*.py
+      - radon cc --show-complexity --average setupr/*.py
+      - radon mi setupr/*.py
     sources:
-      - drakkar/*.py
+      - setupr/*.py
   check:
     desc: "Runs all the checks"
     deps: ["check-isort", "check-black", "check-flake8", "check-mypy", "check-docs", "check-bandit", "check-radon"]
@@ -126,7 +126,7 @@ tasks:
       - poetry build --verbose
     sources:
       - docs/**/*
-      - drakkar/**/*
+      - setupr/**/*
       - tests/**/*
     generates:
       - dist/**/*

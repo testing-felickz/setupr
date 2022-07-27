@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
 import pytest
 from plumbum import ProcessExecutionError, local
 
-from drakkar.get_url import Downloader
-from drakkar.pre_flight import PreFlight
+from setupr.get_url import Downloader
+from setupr.pre_flight import PreFlight
 
 
 def test_home_bin():
@@ -36,7 +36,7 @@ def test_goss_version_good(preflight):
 
     mgoss = MagicMock(side_effect=_side_efect)
     preflight._downloader = MagicMock(spec=Downloader)
-    with patch("drakkar.pre_flight.local") as mlocal:
+    with patch("setupr.pre_flight.local") as mlocal:
         mlocal.__getitem__.return_value = mgoss
         assert preflight.goss is mgoss
         assert not preflight._downloader.fetch.called
@@ -56,7 +56,7 @@ def test_goss_version_bad(preflight):
         with patch.object(
             pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU
         ):
-            with patch("drakkar.pre_flight.local") as mlocal:
+            with patch("setupr.pre_flight.local") as mlocal:
                 mlocal.__getitem__.return_value = mgoss
                 assert preflight.goss is mgoss
                 assert preflight._downloader.fetch.called
@@ -71,7 +71,7 @@ def test_PreFlight_goss_is_cached(preflight):
 @pytest.fixture
 def mock_preflight():
     with patch(
-        "drakkar.pre_flight.PreFlight.goss", new_callable=PropertyMock
+        "setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock
     ) as mock_goss:
         preflight = PreFlight()
         mgoss = MagicMock(spec=local)
@@ -101,7 +101,7 @@ def test_infrastructure(mock_preflight):
 )
 def test_run(is_file, retcode, mock_preflight):
     with patch(
-        "drakkar.pre_flight.PreFlight.goss", new_callable=PropertyMock
+        "setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock
     ) as mock_goss:
         with patch.object(pathlib.Path, "is_file", lambda _: is_file):
             mgoss = MagicMock(spec=local)
@@ -123,11 +123,11 @@ def test_run(is_file, retcode, mock_preflight):
             assert mock_preflight._downloader.fetch.called is not is_file
 
 
-@patch("drakkar.pre_flight.PreFlight.goss", new_callable=PropertyMock)
-@patch("drakkar.pre_flight.take_backup")
+@patch("setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock)
+@patch("setupr.pre_flight.take_backup")
 def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
     mopen = mock_open()
-    with patch("drakkar.pre_flight.open", mopen):
+    with patch("setupr.pre_flight.open", mopen):
         with patch.object(pathlib.Path, "is_file", lambda _: True):
             m_take_backup.return_value = "xUnitTest"
             mgoss = MagicMock(spec=local)

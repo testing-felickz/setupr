@@ -52,7 +52,7 @@ docs: ## Build and serve the documentation
 	@mkdocs serve
 
 bandit: ## Runs security concerns.
-	@bandit --verbose --recursive drakkar
+	@bandit --verbose --recursive setupr
 
 .PHONY: help
 help:

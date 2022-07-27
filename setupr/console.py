@@ -12,10 +12,10 @@ import structlog
 from click_help_colors import HelpColorsCommand  # type: ignore
 from rich.traceback import install
 
-from drakkar import __version__
-from drakkar.commands import pgp_key, pre_flight
-from drakkar.get_url import Downloader
-from drakkar.print import wprint
+from setupr import __version__
+from setupr.commands import pgp_key, pre_flight
+from setupr.get_url import Downloader
+from setupr.print import wprint
 
 # Click.
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -117,13 +117,13 @@ def confirgure_logging(log_level: str, verbose: bool) -> None:
                 "file": {
                     "level": _lvl[log_level],
                     "class": "logging.handlers.WatchedFileHandler",
-                    "filename": "drakkar.log",
+                    "filename": "setupr.log",
                     "formatter": "plain",
                 },
             },
             # Define all the loggers you want!
             "loggers": {
-                "drakkar": {
+                "setupr": {
                     "handlers": ["default", "file"],
                     "level": _lvl[log_level],
                     "propagate": True,
@@ -296,7 +296,7 @@ def main(  # noqa
     version: bool,
     verbose: bool,
 ) -> None:
-    """Drakkar ships the Worldr infrastructure.
+    """Setupr ships the Worldr infrastructure.
 
     Note that <semver> must be a valid semantic version. This is different for
     all the scripts. Please check the user documentation for the exact values.
@@ -307,7 +307,7 @@ def main(  # noqa
         sys.exit(0)
 
     confirgure_logging(log_level, verbose)
-    logger = structlog.get_logger("drakkar")
+    logger = structlog.get_logger("setupr")
     logger.debug(
         "All the loggers",
         loggers=[name for name in logging.root.manager.loggerDict],
@@ -318,7 +318,7 @@ def main(  # noqa
     # logger.warning("monkey")
     # logger.error("eek")
 
-    # gah = structlog.get_logger("drakkar.gah")
+    # gah = structlog.get_logger("setupr.gah")
     # gah.error("urgh")
 
     dlr = Downloader()

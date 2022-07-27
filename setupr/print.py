@@ -33,7 +33,7 @@ def wprint(text: str, level: str = "") -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     # We do not need to test any of this… It is just an example!
-    # >>> python drakkar/print.py
+    # >>> python setupr/print.py
     TEXT = (
         "[i]I Am Malenia[/i], "
         "[b]Blade Of Miquella[/b], And "
