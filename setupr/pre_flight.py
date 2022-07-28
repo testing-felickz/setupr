@@ -4,7 +4,6 @@
 Note that plumbum does not have type hints. Please see the bug [Type hints
         for library #334 ](https://github.com/tomerfiliba/plumbum/issues/334)
 for more information.
-
 """
 import pathlib
 import stat
@@ -82,15 +81,14 @@ class PreFlight:
         return self._goss
 
     def _fetch_file(self, what: str) -> pathlib.Path:
-        """Fetches a file, if needed"""
+        """Fetches a file, if needed."""
         name = f"goss-{what}.yaml"
         check = pathlib.Path.cwd() / f"{name}"
-        if not check.is_file():
-            self._downloader.fetch(
-                f"{URL_BASE_CHECKS}/{name}",
-                check,
-                SHA256SUM[name],
-            )
+        self._downloader.fetch(
+            f"{URL_BASE_CHECKS}/{name}",
+            check,
+            SHA256SUM[name],
+        )
         return check
 
     def security(self) -> int:

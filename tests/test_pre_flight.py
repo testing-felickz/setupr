@@ -93,34 +93,33 @@ def test_infrastructure(mock_preflight):
 
 
 @pytest.mark.parametrize(
-    "is_file,retcode",
+    "retcode",
     [
-        (True, 1),
-        (False, 0),
+        (1),
+        (0),
     ],
 )
-def test_run(is_file, retcode, mock_preflight):
+def test_run(retcode, mock_preflight):
     with patch(
         "setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock
     ) as mock_goss:
-        with patch.object(pathlib.Path, "is_file", lambda _: is_file):
-            mgoss = MagicMock(spec=local)
-            mgoss.run = Mock(return_value=(retcode, "", ""))
-            mock_goss.return_value = mgoss
-            mock_preflight._downloader.fetch = Mock()
-            assert mock_preflight._run("security") == retcode
-            mgoss.run.assert_called_once_with(
-                (
-                    "-g",
-                    (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
-                    "validate",
-                    "--format",
-                    "documentation",
-                    "--no-color",
-                )
+        mgoss = MagicMock(spec=local)
+        mgoss.run = Mock(return_value=(retcode, "", ""))
+        mock_goss.return_value = mgoss
+        mock_preflight._downloader.fetch = Mock()
+        assert mock_preflight._run("security") == retcode
+        mgoss.run.assert_called_once_with(
+            (
+                "-g",
+                (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
+                "validate",
+                "--format",
+                "documentation",
+                "--no-color",
             )
-            # If is_file is true, then we do not need to fetch it!
-            assert mock_preflight._downloader.fetch.called is not is_file
+        )
+        # If is_file is true, then we do not need to fetch it!
+        assert mock_preflight._downloader.fetch.called is True
 
 
 @patch("setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock)
@@ -128,24 +127,23 @@ def test_run(is_file, retcode, mock_preflight):
 def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
     mopen = mock_open()
     with patch("setupr.pre_flight.open", mopen):
-        with patch.object(pathlib.Path, "is_file", lambda _: True):
-            m_take_backup.return_value = "xUnitTest"
-            mgoss = MagicMock(spec=local)
-            mgoss.run = Mock(side_effect=ProcessExecutionError("", 1, "", ""))
-            mock_goss.return_value = mgoss
-            mock_preflight._downloader.fetch = Mock()
-            assert mock_preflight._run("security") == 1
-            mgoss.run.assert_called_once_with(
-                (
-                    "-g",
-                    (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
-                    "validate",
-                    "--format",
-                    "documentation",
-                    "--no-color",
-                )
+        m_take_backup.return_value = "xUnitTest"
+        mgoss = MagicMock(spec=local)
+        mgoss.run = Mock(side_effect=ProcessExecutionError("", 1, "", ""))
+        mock_goss.return_value = mgoss
+        mock_preflight._downloader.fetch = Mock()
+        assert mock_preflight._run("security") == 1
+        mgoss.run.assert_called_once_with(
+            (
+                "-g",
+                (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
+                "validate",
+                "--format",
+                "documentation",
+                "--no-color",
             )
-            # If is_file is true, then we do not need to fetch it!
-            assert mock_preflight._downloader.fetch.called is False
-            assert m_take_backup.called
-            mopen.assert_called_once_with("xUnitTest", "w")
+        )
+        # If is_file is true, then we do not need to fetch it!
+        assert mock_preflight._downloader.fetch.called is True
+        assert m_take_backup.called
+        mopen.assert_called_once_with("xUnitTest", "w")
