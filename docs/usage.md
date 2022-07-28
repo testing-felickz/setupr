@@ -9,6 +9,9 @@ check the digital signatures of all the scripts downloaded. If one of these
 signatures is invalid, please contact Worldr immediatly and do not proceed
 with the installation.
 
+Some files might already exist when you request them. If so, a backup of the
+file is taken and moved to a directory called `archives` with an ISO time stamp.
+
 ## Installation
 
 This command will download and verify the installation script: `setupr --install VERSION`
