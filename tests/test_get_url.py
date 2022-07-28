@@ -110,14 +110,14 @@ def test_take_backup():
         with open(file, "w") as fp:
             fp.write("created temporary file 0\n")
         assert take_backup(file) == file
-        all_files = glob(f"{tmpdirname}/test*.txt")
+        all_files = glob(f"{tmpdirname}/archives/test*.txt")
         assert len(all_files) == 1, "There should be only one…"
         date_string = re.findall(
             r"_[0-9]{4}-[0-9]{2}-[0-9]{2}T.*\.",
             all_files[0],
             flags=re.IGNORECASE,
         )[0][1:-1]
-        assert all_files[0].startswith(f"{tmpdirname}/test_")
+        assert all_files[0].startswith(f"{tmpdirname}/archives/test_")
         assert all_files[0].endswith(".txt")
         try:
             parse(date_string)
@@ -131,9 +131,10 @@ def test_take_backup():
 
 
 def test_take_backup_no_need():
-    sut = pathlib.Path("/file/does/not/exits/ever/no/really/it/does/not")
-    bak = take_backup(sut)
-    assert bak is sut
+    with patch.object(pathlib.Path, "is_dir", lambda _: True):
+        sut = pathlib.Path("/file/does/not/exits/ever/no/really/it/does/not")
+        bak = take_backup(sut)
+        assert bak is sut
 
 
 @pytest.fixture

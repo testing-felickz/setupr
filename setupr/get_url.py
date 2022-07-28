@@ -116,8 +116,12 @@ def download(urls: Iterable[str], dest_dir: str) -> None:
 
 def take_backup(filename: Path) -> Path:
     """Move the file to a backup one with the date."""
+    _archive = filename.parent / "archives"
+    if not _archive.is_dir():
+        rlog.warning("Creating bacckup directory", dir=_archive)
+        _archive.mkdir()
     if filename.is_file():
-        new_name = f"{filename.parent}/{filename.stem}_{pendulum.now().to_iso8601_string()}{filename.suffix}"  # noqa
+        new_name = f"{_archive}/{filename.stem}_{pendulum.now().to_iso8601_string()}{filename.suffix}"  # noqa
         filename.rename(new_name)
     return filename
 
