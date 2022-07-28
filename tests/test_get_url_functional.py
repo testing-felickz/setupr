@@ -38,9 +38,11 @@ def test_get_real_scripts(what, version, basename):
     # Check that we have a PGP key.
     sut = Downloader()
     if not sut._gpg.worldr_key_exists():  # pragma: no cover
-        pytest.skip(
-            "Worldr PGP key is not found, therefore this test cannot run."
-        )
+        if not sut._gpg.import_worldr_key():
+            pytest.skip(
+                "Worldr PGP key cannot be imported, "
+                "therefore this test cannot run."
+            )
 
     # Call.
     assert sut.get(f"{what}", f"{version}") is True

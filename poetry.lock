@@ -889,6 +889,21 @@ tomli = ">=1.0.0"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-cov"
+version = "3.0.0"
+description = "Pytest plugin for measuring coverage."
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+coverage = {version = ">=5.2.1", extras = ["toml"]}
+pytest = ">=4.6"
+
+[package.extras]
+testing = ["virtualenv", "pytest-xdist", "six", "process-tests", "hunter", "fields"]
+
+[[package]]
 name = "pytest-skip-slow"
 version = "0.0.3"
 description = "A pytest plugin to skip `@pytest.mark.slow` tests by default. "
@@ -1379,7 +1394,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "457deb0b6a10c6327167ca58a303dabcf06b7929c0d35a550f7708d2975745ec"
+content-hash = "ba88ba751e6f61c9a05f7d27775d4bda5f299e6d4c6a5b2230192a9d0159edd3"
 
 [metadata.files]
 argcomplete = []
@@ -1457,6 +1472,7 @@ pyparsing = []
 pyreadline = []
 pyrepl = []
 pytest = []
+pytest-cov = []
 pytest-skip-slow = []
 pytest-sugar = []
 python-dateutil = []

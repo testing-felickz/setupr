@@ -39,7 +39,9 @@ class GPG:
             fp = import_result.fingerprints[0]
             rlog.info(
                 "PGP key imported successfully.",
-                fingerprint=[fp[i : i + 4] for i in range(0, len(fp), 4)],
+                fingerprint=[
+                    fp[i : i + 4] for i in range(0, len(fp), 4)
+                ],  # noqa: E203
             )
             self._gpg.trust_keys(
                 import_result.fingerprints[0], "TRUST_ULTIMATE"

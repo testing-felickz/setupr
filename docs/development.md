@@ -40,6 +40,8 @@ take time to run. The latter will run all the tests.
 We have 100% test coverage — with a few cheats using `pragma: no sover` for
 code should be excluded.
 
+The GHA should create a nice coverage report.
+
 ### GnuPG
 
 We use [python-gnupg](https://gnupg.readthedocs.io/en/latest/#) and

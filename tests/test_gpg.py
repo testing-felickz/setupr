@@ -34,6 +34,18 @@ def test_worldr_key_does_not_exist(mocked_gpg):
     ), "Worldr key should not be there"
 
 
+def test_worldr_key_does_not_exist_but_there_are_others(mocked_gpg):
+    mocked_gpg._gpg.list_keys = MagicMock(
+        return_value=[
+            {"fingerprint": "0000000000000000000000000000000000000000"},
+            {"fingerprint": "1111111111111111111111111111111111111111"},
+        ]
+    )
+    assert (
+        mocked_gpg.worldr_key_exists() is False
+    ), "Worldr key should not be there"
+
+
 def test_import_key_failure(mocked_gpg):
     imported = MagicMock(spec=gnupg.ImportResult)
     imported.count = 0
@@ -107,10 +119,11 @@ def test_verify_for_real():
     """
     sut = GPG()
     if not sut.worldr_key_exists():  # pragma: no cover
-        # We cannot run, aborting.
-        pytest.skip(
-            "Worldr PGP key is not found, therefore this test cannot run."
-        )
+        if not sut.import_worldr_key():
+            pytest.skip(
+                "Worldr PGP key cannot be imported, "
+                "therefore this test cannot run."
+            )
     filename = PurePath(
         Path(__file__).resolve().parent, "charon-lord-dunsany.txt"
     )
