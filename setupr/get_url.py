@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Wrapper to requests to get thing from URL and verify their PGP signatures.
-
-
-"""
+"""Wrapper to requests to get thing from URL and verify their PGP
+signatures."""
 import logging
 import signal
+import stat
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
@@ -52,8 +51,8 @@ def handle_sigint(
 ) -> None:  # pragma: no cover  # noqa
     """Handle SIGINT signal.
 
-    There is little point in unit testing this function. A functional test
-    would take a lot of setup for very gain.
+    There is little point in unit testing this function. A functional
+    test would take a lot of setup for very gain.
     """
     rlog.debug("signal handle", signum=signum, frame=frame)
     done_event.set()
@@ -143,6 +142,7 @@ class Downloader:
                 ),
                 Path.cwd().as_posix(),
             )
+            (Path.cwd() / script).chmod(stat.S_IRWXU)
             return self._gpg.validate_worldr_signature(
                 (Path.cwd() / script).as_posix(),
                 (Path.cwd() / signature).as_posix(),

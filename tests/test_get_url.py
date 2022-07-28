@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+import pathlib
 import re
+import stat
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from glob import glob
-from pathlib import Path
 from unittest.mock import ANY, MagicMock, Mock, patch
 
 import gnupg
@@ -61,7 +62,6 @@ def test_download():
             mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
                 return_value=pool
             )
-
             url = "https://worldr.com/index.html"
             download(
                 [
@@ -106,7 +106,7 @@ def test_download_failed():
 
 def test_take_backup():
     with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
-        file = Path(tmpdirname, "test.txt")
+        file = pathlib.Path(tmpdirname, "test.txt")
         with open(file, "w") as fp:
             fp.write("created temporary file 0\n")
         assert take_backup(file) == file
@@ -131,7 +131,7 @@ def test_take_backup():
 
 
 def test_take_backup_no_need():
-    sut = Path("/file/does/not/exits/ever/no/really/it/does/not")
+    sut = pathlib.Path("/file/does/not/exits/ever/no/really/it/does/not")
     bak = take_backup(sut)
     assert bak is sut
 
@@ -181,7 +181,10 @@ def test_get_files(sig, error, expected, downloader):
         # This can override the return value if error is not None.
         mocked_download.side_effect = error
         downloader._gpg.validate_worldr_signature = MagicMock(return_value=sig)
-        assert downloader._get_files("test", "v1.2.3") is expected
+        with patch.object(
+            pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU
+        ):
+            assert downloader._get_files("test", "v1.2.3") is expected
         assert mocked_download.called
 
 
@@ -211,7 +214,7 @@ def test_get_files(sig, error, expected, downloader):
     ],
 )
 def test_fetch(hash, error, expected, downloader):
-    dst = Path(__file__).parent / "charon-lord-dunsany.txt"
+    dst = pathlib.Path(__file__).parent / "charon-lord-dunsany.txt"
     with patch("setupr.get_url.download") as mocked_download:
         mocked_download.side_effect = error
         assert downloader.fetch("/dev/null", dst, hash) is expected
