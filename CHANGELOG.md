@@ -4,6 +4,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2022-07-29)
+### Feature
+* **archives:** Backups are moved to an archive folder ([`6bafa18`](https://github.com/worldr/setupr/commit/6bafa18a492bd8a54d34bb0857adc7886deecd3e))
+* **rename:** New name for the project ([#34](https://github.com/worldr/setupr/issues/34)) ([`60c859e`](https://github.com/worldr/setupr/commit/60c859e76fe05d57be25387e14bb194d4e8010b7))
+
+### Fix
+* **goss:** Definitions files always downloaded ([`543cd99`](https://github.com/worldr/setupr/commit/543cd995751fb16913e2e59377a597661b6148ef))
+* **chmod:** Script have executable set ([#38](https://github.com/worldr/setupr/issues/38)) ([`787ea54`](https://github.com/worldr/setupr/commit/787ea542f8033fd40ba0131a5100f5e78820c2fd))
+
+### Documentation
+* **archives:** Added documentation ([`651c98a`](https://github.com/worldr/setupr/commit/651c98a8051d7c38ff0d26516bb370cd15ec5758))
+* Added documentation ([#33](https://github.com/worldr/setupr/issues/33)) ([`2cf9ff5`](https://github.com/worldr/setupr/commit/2cf9ff5e275d927cabdb8190cf468b89b9e90ee8))
+
 ## v0.1.0 (2022-07-25)
 ### Feature
 * **GHA:** Release action ([#25](https://github.com/worldr/setupr/issues/25)) ([`99f13a5`](https://github.com/worldr/setupr/commit/99f13a5efed95b077dee7daacff49e0c8be57ab3))
