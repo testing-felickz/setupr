@@ -76,7 +76,7 @@ jobs:
       - name: "Testing"
         run: |
           echo "Check labels is not empty…"
-          echo ${{github.event.pull_request.labels.*.name}}
+          echo ${{github.event.pull_request.labels.*.name[0]}}
 
   # coverage:
   #   if: ${{ !contains(github.event.pull_request.labels.*.name, 'chore') }}
