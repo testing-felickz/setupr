@@ -22,7 +22,7 @@ GOSS_EXE = "goss-linux-amd64"
 GOSS_URL = "https://github.com/aelsabbahy/goss/releases/download"
 GOSS_VERSION = "v0.3.16"
 SHA256SUM = {
-    "goss-infrastructure.yaml": "28a50e5d382ec81da96fe298cf010ea7b78c27674f0ed631f759f5bb0120b234",  # noqa
+    "goss-infrastructure.yaml": "3f32f6e66b07b71249141846e849f8c72c8954f2b50bac8aaccf58885d396358",  # noqa
     "goss-linux-amd64": "827e354b48f93bce933f5efcd1f00dc82569c42a179cf2d384b040d8a80bfbfb",  # noqa
     "goss-security.yaml": "8c2d12b4dd6c555ec558e1d30f862bd352e44217dd6b3626208ad2840e0064fe",  # noqa
 }
