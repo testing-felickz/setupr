@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Setupr."""
 from importlib import metadata
 
 __version__ = metadata.version(__package__)

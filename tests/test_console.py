@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 from unittest.mock import Mock, patch
 
 import pytest
@@ -82,24 +83,26 @@ def test_verify_semver(input, expected, error):
 
 
 @pytest.mark.parametrize(
-    "opt,key,checks,get,expected",
+    "opt,key,checks,get,exec,expected",
     [
-        ("-b", False, None, False, 1),
-        ("-b", False, None, True, 1),
-        ("-b", True, None, False, 1),
-        ("-b", True, None, True, 0),
-        ("-d", False, None, False, 1),
-        ("-d", False, None, True, 1),
-        ("-d", True, None, False, 1),
-        ("-d", True, None, True, 0),
-        ("-i", False, False, False, 1),
-        ("-i", False, False, True, 1),
-        ("-i", False, True, False, 1),
-        ("-i", False, True, True, 1),
-        ("-i", True, False, False, 1),
-        ("-i", True, False, True, 1),
-        ("-i", True, True, False, 1),
-        ("-i", True, True, True, 0),
+        ("-b", False, None, False, True, 1),
+        ("-b", False, None, True, True, 1),
+        ("-b", True, None, False, True, 1),
+        ("-b", True, None, True, True, 0),
+        ("-d", False, None, False, True, 1),
+        ("-d", False, None, True, True, 1),
+        ("-d", True, None, False, True, 1),
+        ("-d", True, None, True, True, 0),
+        ("-d", True, None, True, False, 2),
+        ("-i", False, False, False, True, 1),
+        ("-i", False, False, True, True, 1),
+        ("-i", False, True, False, True, 1),
+        ("-i", False, True, True, True, 1),
+        ("-i", True, False, False, True, 1),
+        ("-i", True, False, True, True, 1),
+        ("-i", True, True, False, True, 1),
+        ("-i", True, True, True, True, 0),
+        ("-i", True, True, True, False, 2),
     ],
 )
 @patch("setupr.console.pgp_key")
@@ -113,12 +116,14 @@ def test_console(
     key,
     checks,
     get,
+    exec,
     expected,
 ):
     m_pgp_key.return_value = key
     m_pre_flight.return_value = checks
     m_dlr = Mock(spec=Downloader)
     m_dlr.get.return_value = get
+    m_dlr.execute_script.return_value = exec
     m_downloader.return_value = m_dlr
 
     runner = CliRunner()

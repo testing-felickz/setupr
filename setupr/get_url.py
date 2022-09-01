@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Wrapper to requests to get thing from URL and verify their PGP
-signatures."""
+"""Requests to get thing from URL and verify their PGP signatures."""
 import logging
 import signal
 import stat
@@ -13,6 +12,8 @@ from typing import Iterable, Optional
 import pendulum
 import requests
 import structlog
+from plumbum import local  # type: ignore
+from rich.console import Console
 from rich.progress import (
     BarColumn,
     DownloadColumn,
@@ -22,9 +23,18 @@ from rich.progress import (
     TimeRemainingColumn,
     TransferSpeedColumn,
 )
+from rich.prompt import Confirm
 from sha256sum import sha256sum
 
 from setupr.gpg import GPG
+from setupr.print import (
+    COLOUR_FAIL,
+    COLOUR_GREY,
+    COLOUR_INFO,
+    COLOUR_SUCC,
+    COLOUR_WARN,
+    wprint,
+)
 
 progress = Progress(
     TextColumn("[bold blue]{task.fields[filename]}", justify="right"),
@@ -180,7 +190,7 @@ class Downloader:
     def fetch(
         self, source: str, destination: Path, expected_hash: str
     ) -> bool:
-        """Fetches a package from the Internet and verifies it."""
+        """Fetch a package from the Internet and verifies it."""
         try:
             download((source,), destination.parent.as_posix())
         except requests.exceptions.RequestException as ex:
@@ -197,3 +207,58 @@ class Downloader:
             rlog.error("Wrong hash", file=destination)
             return False
         return True
+
+    def execute_script(self, what: str, version: str) -> bool:
+        """Execute the script what at version."""
+        # Get the script's name.
+        script = f"{what}-{version}.sh"
+        signature = f"{what}-{version}.sig"
+
+        # Check that the user wants to execute the script.
+        if not Confirm.ask(
+            f"Do you want to execute the {Path.cwd() / script} script?"
+        ):
+            rlog.info("User aborted")
+            return True  # Nothing happened, therefore it is not an error.
+
+        # Verify the script's signature again.
+        if not self._gpg.validate_worldr_signature(
+            (Path.cwd() / script).as_posix(),
+            (Path.cwd() / signature).as_posix(),
+        ):
+            rlog.error("Invalid signature", script=script)
+            return False
+
+        # Execute the script.
+        rlog.info("Executing script", script=script)
+        console = Console()
+        script = local[f"{Path.cwd() / script}"]
+        console.rule(f"[{COLOUR_INFO}]Executing {script} script")
+        with console.status(
+            f"[{COLOUR_INFO}]Installing infrastructure… Please wait",
+            spinner="moon",
+            spinner_style=f"{COLOUR_INFO}",
+        ):
+            proc = script.popen(close_fds=True)  # type: ignore
+            for raw in proc.stdout:
+                line = raw.decode("utf-8").strip()
+                line_low = line.lower()
+                if "error" in line_low:
+                    console.log(f"[{COLOUR_FAIL}]script stdout: {line}")
+                elif "warn" in line_low:
+                    console.log(f"[{COLOUR_WARN}]script stdout: {line}")
+                elif "success" in line_low:
+                    console.log(f"[{COLOUR_SUCC}]script stdout: {line}")
+                else:
+                    console.log(f"[{COLOUR_GREY}]script stdout: {line}")
+            out, err = proc.communicate()
+            if out:
+                console.log(f"[{COLOUR_GREY}]final script stdout: {out}")
+            if err:
+                console.log(f"[{COLOUR_FAIL}]final script stderr: {out}")
+            returnCode = proc.returncode
+            if returnCode != 0:
+                wprint(f"Exit Code {returnCode}", level="failure")
+                return False  # Script failed.
+            wprint(f"Exit Code {returnCode}", level="success")
+        return True  # Script succeeded.

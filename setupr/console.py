@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" … """
+"""Console entry point."""
 import logging
 import logging.config
 import sys
@@ -10,12 +10,13 @@ import click
 import semver  # type: ignore
 import structlog
 from click_help_colors import HelpColorsCommand  # type: ignore
+from rich.console import Console
 from rich.traceback import install
 
 from setupr import __version__
 from setupr.commands import pgp_key, pre_flight
 from setupr.get_url import Downloader
-from setupr.print import wprint
+from setupr.print import COLOUR_INFO, wprint
 
 # Click.
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -37,7 +38,6 @@ pre_chain = [
 
 def confirgure_logging(log_level: str, verbose: bool) -> None:
     """Configure all the logging."""
-
     # Logging levels
     # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level  # noqa
     _lvl = {
@@ -187,6 +187,7 @@ class MutuallyExclusiveOption(click.Option):
     """
 
     def __init__(self, *args, **kwargs):  # type: ignore
+        """Initialize."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
         help = kwargs.get("help", "")
         if self.mutually_exclusive:  # pragma: no cover
@@ -198,6 +199,7 @@ class MutuallyExclusiveOption(click.Option):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):  # type: ignore
+        """Handle parse result."""
         if self.mutually_exclusive.intersection(opts) and self.name in opts:
             raise click.UsageError(
                 f"Illegal usage: `{self.name}` is mutually exclusive with "
@@ -211,7 +213,10 @@ def validate_semver(
 ) -> typing.Union[None, Any]:
     """Validate the option is semver compliante.
 
-    If the option is None, do nothing."""
+    If the option is None, do nothing.
+    """
+    logger = structlog.get_logger("setupr")
+    logger.debug("params", ctx=ctx, param=param, value=value)
     if value is None:
         return None
     try:
@@ -298,8 +303,9 @@ def main(  # noqa
 ) -> None:
     """Setupr ships the Worldr infrastructure.
 
-    Note that <semver> must be a valid semantic version. This is different for
-    all the scripts. Please check the user documentation for the exact values.
+    Note that <semver> must be a valid semantic version. This is
+    different for all the scripts. Please check the user documentation
+    for the exact values.
     """
     # Version
     if version:
@@ -325,6 +331,9 @@ def main(  # noqa
 
     # sys.exit(0)
 
+    console = Console()
+    console.rule(f"[{COLOUR_INFO}]WORLDR setupr script")
+
     if install is not None:
         wprint(
             f"Downloading [i]installation[/i] script at version [b]{install}[/b]",  # noqa
@@ -338,6 +347,10 @@ def main(  # noqa
             logger.error("Failure to get install script.", version=install)
             wprint("Operation failed.", level="failure")
             sys.exit(1)
+        if not dlr.execute_script("worldr-install", f"v{install}"):
+            logger.error("Failure to execute install script.", version=install)
+            wprint("Installation script failed.", level="failure")
+            sys.exit(2)
         logger.info("Success", script="install")
 
     elif debug is not None:
@@ -349,6 +362,10 @@ def main(  # noqa
             logger.error("Failure to get debug script.", version=debug)
             wprint("Operation failed.", level="failure")
             sys.exit(1)
+        if not dlr.execute_script("worldr-debug", f"v{install}"):
+            logger.error("Failure to execute debug script.", version=install)
+            wprint("Debug script failed.", level="failure")
+            sys.exit(2)
         logger.info("Success", script="debug")
 
     elif backup is not None:

@@ -12,7 +12,8 @@ rlog = structlog.get_logger("setupr.commands")
 def pgp_key() -> bool:
     """If we do not have the Worldr GPG key, get it.
 
-    We cannot continue without it."""
+    We cannot continue without it.
+    """
     _gpg = GPG()
     if not _gpg.worldr_key_exists():
         msg = "Worldr PGP key not found, attempted to import it"
@@ -34,7 +35,8 @@ def pre_flight() -> bool:
 
     The security ones are advisory only so we can continue if they fail. On
     the other hand, the infrastructure ones are mandatory and we cannot
-    continue if they fail."""
+    continue if they fail.
+    """
     _pre_flight = PreFlight()
     if _pre_flight.security() != 0:
         msg = "Pre flight security checks failed. This is advisory only"

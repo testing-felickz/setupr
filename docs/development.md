@@ -64,15 +64,16 @@ gpg: Signature made Tue 28 Jun 2022 11:27:22 BST
 gpg:                using RSA key 935D282626A16D1A0430487D65A277F7800F774C
 gpg:                issuer "worldr-for-mst@worldr.com"
 gpg: Good signature from "Worldr Technologies (MST application) <worldr-for-mst@worldr.com>" [ultimate]
-√ .venv; gpg --verify tests/charon-lord-dunsany-bad.sig tests/charon-lord-dunsany.txt
-gpg: Signature made Tue 28 Jun 2022 11:24:42 BST
-gpg:                using RSA key 935D282626A16D1A0430487D65A277F7800F774C
-gpg:                issuer "worldr-for-mst@worldr.com"
-gpg: BAD signature from "Worldr Technologies (MST application) <worldr-for-mst@worldr.com>" [ultimate]
 ```
 
 There is a test that runs iff the Worldr key is in the local key ring. This
 should be true for most developers. If not, the test is skipped.
+
+The script `runme.sh` and its signature `runme.sig` are used in the functinal tests. Any changes to that script will require a new signature so that the script can run.
+
+```bash
+gpg --default-key "worldr-for-mst@worldr.com" --armour --output tests/runme-v1.0.0.sig --detach-sign tests/runme-v1.0.0.sh
+```
 
 ## Logs
 

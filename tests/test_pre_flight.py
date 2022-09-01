@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 import pathlib
 import stat
 from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch

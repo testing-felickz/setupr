@@ -26,7 +26,7 @@ class GPG:
         return False
 
     def import_worldr_key(self) -> bool:
-        """Imports the included Worldr PGP key."""
+        """Import the included Worldr PGP key."""
         key = PurePath(
             Path(__file__).resolve().parent,
             "Worldr-MST-installation-PGP-key.asc",
@@ -52,7 +52,7 @@ class GPG:
         return False
 
     def validate_worldr_signature(self, filename: str, signature: str) -> bool:
-        """Validates a worldr signature."""
+        """Validate a worldr signature."""
         with open(signature, "rb") as stream:
             verified = self._gpg.verify_file(stream, filename)
             if verified.status == "signature bad":

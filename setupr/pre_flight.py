@@ -22,7 +22,7 @@ GOSS_EXE = "goss-linux-amd64"
 GOSS_URL = "https://github.com/aelsabbahy/goss/releases/download"
 GOSS_VERSION = "v0.3.16"
 SHA256SUM = {
-    "goss-infrastructure.yaml": "3f32f6e66b07b71249141846e849f8c72c8954f2b50bac8aaccf58885d396358",  # noqa
+    "goss-infrastructure.yaml": "ef45088bb00d9e00f54971dbbaf6c1b60f85a419cfc3ce1fdc80d0cabf403aeb",  # noqa
     "goss-linux-amd64": "827e354b48f93bce933f5efcd1f00dc82569c42a179cf2d384b040d8a80bfbfb",  # noqa
     "goss-security.yaml": "8c2d12b4dd6c555ec558e1d30f862bd352e44217dd6b3626208ad2840e0064fe",  # noqa
 }
@@ -33,7 +33,7 @@ class PreFlight:
     """Wrapper to all pre-flight calls."""
 
     def __init__(self) -> None:
-        """Initialisation."""
+        """Initialise."""
         self._log = structlog.get_logger("setupr.pre_flight")
         self._goss = None
         self._downloader = Downloader()
@@ -81,7 +81,7 @@ class PreFlight:
         return self._goss
 
     def _fetch_file(self, what: str) -> pathlib.Path:
-        """Fetches a file, if needed."""
+        """Fetch a file, if needed."""
         name = f"goss-{what}.yaml"
         check = pathlib.Path.cwd() / f"{name}"
         self._downloader.fetch(
@@ -92,15 +92,15 @@ class PreFlight:
         return check
 
     def security(self) -> int:
-        """Runs the security checks."""
+        """Run the security checks."""
         return self._run("security")
 
     def infrastructure(self) -> int:
-        """Runs the infrastructure checks."""
+        """Run the infrastructure checks."""
         return self._run("infrastructure")
 
     def _run(self, what: str) -> int:
-        """Wrapper to run goss."""
+        """Run goss."""
         check = self._fetch_file(what)
         try:
             retcode, _, _ = self.goss.run(

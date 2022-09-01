@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 import pytest
 import requests
@@ -23,9 +25,8 @@ from setupr.pre_flight import (
         ("backup", "v3.7.9", "backup-restore-v3.7.9"),
     ],
 )
-def test_get_real_scripts(what, version, basename):
-    """This does it all for real, iff we have the PGP key & access to the
-    internet.
+def test_get_real_scripts(what: str, version: str, basename: str) -> None:
+    """Run iff we have the PGP key & access to the internet.
 
     The test should tidy after itself.
     """
@@ -71,7 +72,7 @@ def test_get_real_scripts(what, version, basename):
         ),
     ],
 )
-def test_fetch_goss(file, url):
+def test_fetch_goss(file: str, url: str) -> None:
     """This does it all for real, iff we have access to the internet.
 
     The test should tidy after itself.
@@ -87,3 +88,13 @@ def test_fetch_goss(file, url):
     if not Path(f"{file}").is_file():  # pragma: no cover
         pytest.fail(f"{file} was not downloaded.")
     Path(f"{file}").unlink()
+
+
+@pytest.mark.slow
+def test_execute_script() -> None:
+    """This does things for real and will take time."""
+    with patch("setupr.get_url.Confirm") as mocked_confirm:
+        mocked_confirm.ask = Mock(return_value=True)
+        sut = Downloader()
+        assert sut.execute_script("tests/runme", "v1.0.0") is True
+        assert mocked_confirm.ask.called

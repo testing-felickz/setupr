@@ -9,6 +9,7 @@ COLOUR_INFO = "#5e81ac"
 COLOUR_NOTE = "#81a1c1"
 COLOUR_SUCC = "#a3be8c"
 COLOUR_WARN = "#d08770"
+COLOUR_GREY = "#777777"
 
 
 def wprint(text: str, level: str = "") -> None:
