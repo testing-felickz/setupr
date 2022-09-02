@@ -28,7 +28,7 @@ def test_version():
 
 
 @pytest.mark.parametrize(
-    "first,second",
+    ("first", "second"),
     [
         ("-i", "-d"),
         ("-d", "-b"),
@@ -43,7 +43,7 @@ def test_mutually_exclusive(first, second):
 
 
 @pytest.mark.parametrize(
-    "opt,value",
+    ("opt", "value"),
     [
         ("-i", "ook"),
         ("-b", "ook"),
@@ -61,7 +61,7 @@ def test_semver(opt, value):
 
 
 @pytest.mark.parametrize(
-    "input,expected,error",
+    ("input", "expected", "error"),
     [
         (None, None, None),
         ("1.2.3", "1.2.3", None),
@@ -83,7 +83,7 @@ def test_verify_semver(input, expected, error):
 
 
 @pytest.mark.parametrize(
-    "opt,key,checks,get,exec,expected",
+    ("opt", "key", "checks", "get", "exec_ret_code", "expected"),
     [
         ("-b", False, None, False, True, 1),
         ("-b", False, None, True, True, 1),
@@ -116,14 +116,14 @@ def test_console(
     key,
     checks,
     get,
-    exec,
+    exec_ret_code,
     expected,
 ):
     m_pgp_key.return_value = key
     m_pre_flight.return_value = checks
     m_dlr = Mock(spec=Downloader)
     m_dlr.get.return_value = get
-    m_dlr.execute_script.return_value = exec
+    m_dlr.execute_script.return_value = exec_ret_code
     m_downloader.return_value = m_dlr
 
     runner = CliRunner()

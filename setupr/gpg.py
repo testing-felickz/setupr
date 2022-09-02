@@ -20,10 +20,10 @@ class GPG:
 
     def worldr_key_exists(self) -> bool:
         """Check if the worldr key exists in the local key ring."""
-        for key in self._gpg.list_keys():
-            if self._fingerprint == key["fingerprint"]:
-                return True
-        return False
+        return any(
+            self._fingerprint == key["fingerprint"]
+            for key in self._gpg.list_keys()
+        )
 
     def import_worldr_key(self) -> bool:
         """Import the included Worldr PGP key."""

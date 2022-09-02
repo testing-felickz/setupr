@@ -80,6 +80,6 @@ repos:
   - id: check-jsonschema
     name: "Check GitHub Workflows"
     files: ^\.github/workflows/
-    # exclude: ^\.github/workflows/.*/action.yml # Should no longer be requiered.
+    exclude: ^\.github/workflows/run-checks/action.yml # GAH!
     types: [yaml]
     args: ["--verbose", "--schemafile", "https://json.schemastore.org/github-workflow"]

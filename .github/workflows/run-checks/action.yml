@@ -11,7 +11,7 @@ runs:
               source .venv/bin/activate
               task check-isort
               task check-black
-              task check-flake8
+              task check-flakeheaven
         shell: bash
 
       - name: "Type hinting check"

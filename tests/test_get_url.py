@@ -26,45 +26,77 @@ from setupr.get_url import Downloader, copy_url, download, take_backup
 @patch("setupr.get_url.done_event")
 def test_copy_url(mocked_done_event: Mock, is_set: bool) -> None:
     mocked_done_event.is_set = Mock(return_value=is_set)  # Branch coverage.
-    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
-        with requests_mock.Mocker() as mocked:
-            url = "https://worldr.com/index.html"
-            mocked.get(url, text="resp", headers={"content-length": "13"})
-            dst = tmpdirname + "/index.html"
-            progress = MagicMock(spec=Progress)
-            copy_url(MagicMock(spec=TaskID), url, dst, progress)
-            assert progress.start_task.called
-            assert progress.update.called
+    with tempfile.TemporaryDirectory(
+        prefix="setupr_tests_"
+    ) as tmpdirname, requests_mock.Mocker() as mocked:
+        url = "https://worldr.com/index.html"
+        mocked.get(url, text="resp", headers={"content-length": "13"})
+        dst = tmpdirname + "/index.html"
+        progress = MagicMock(spec=Progress)
+        copy_url(MagicMock(spec=TaskID), url, dst, progress)
+        assert progress.start_task.called
+        assert progress.update.called
 
 
 @patch("setupr.get_url.done_event")
 def test_copy_url_RequestException(mocked_done_event: Mock) -> None:
     mocked_done_event.is_set = Mock(return_value=False)  # Branch coverage.
-    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
-        with requests_mock.Mocker() as mocked:
-            url = "https://worldr.com/index.html"
-            mocked.get(url, text="resp", status_code=400)
-            dst = tmpdirname + "/index.html"
-            progress = MagicMock(spec=Progress)
-            with pytest.raises(requests.exceptions.RequestException):
-                copy_url(MagicMock(spec=TaskID), url, dst, progress)
-            assert not progress.start_task.called
-            assert not progress.update.called
+    with tempfile.TemporaryDirectory(
+        prefix="setupr_tests_"
+    ) as tmpdirname, requests_mock.Mocker() as mocked:
+        url = "https://worldr.com/index.html"
+        mocked.get(url, text="resp", status_code=400)
+        dst = tmpdirname + "/index.html"
+        progress = MagicMock(spec=Progress)
+        with pytest.raises(requests.exceptions.RequestException):
+            copy_url(MagicMock(spec=TaskID), url, dst, progress)
+        assert not progress.start_task.called
+        assert not progress.update.called
 
 
 def test_download() -> None:
-    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
-        with patch(
-            "setupr.get_url.ThreadPoolExecutor"
-        ) as mocked_ThreadPoolExecutor:
-            pool = MagicMock(spec=ThreadPoolExecutor)
-            fut = Mock()
-            fut.result = Mock()
-            pool.submit = Mock(return_value=fut)
-            mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
-                return_value=pool
-            )
-            url = "https://worldr.com/index.html"
+    with tempfile.TemporaryDirectory(
+        prefix="setupr_tests_"
+    ) as tmpdirname, patch(
+        "setupr.get_url.ThreadPoolExecutor"
+    ) as mocked_ThreadPoolExecutor:
+        pool = MagicMock(spec=ThreadPoolExecutor)
+        fut = Mock()
+        fut.result = Mock()
+        pool.submit = Mock(return_value=fut)
+        mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
+            return_value=pool
+        )
+        url = "https://worldr.com/index.html"
+        download(
+            [
+                url,
+            ],
+            tmpdirname,
+        )
+
+        pool.submit.assert_called_once_with(
+            ANY, ANY, url, tmpdirname + "/index.html", ANY
+        )
+        assert fut.result.called
+
+
+def test_download_failed() -> None:
+    with tempfile.TemporaryDirectory(
+        prefix="setupr_tests_"
+    ) as tmpdirname, patch(
+        "setupr.get_url.ThreadPoolExecutor"
+    ) as mocked_ThreadPoolExecutor:
+        pool = MagicMock(spec=ThreadPoolExecutor)
+        fut = Mock()
+        fut.result = Mock(side_effect=requests.exceptions.RequestException)
+        pool.submit = Mock(return_value=fut)
+        mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
+            return_value=pool
+        )
+
+        url = "https://worldr.com/index.html"
+        with pytest.raises(requests.exceptions.RequestException):
             download(
                 [
                     url,
@@ -72,38 +104,10 @@ def test_download() -> None:
                 tmpdirname,
             )
 
-            pool.submit.assert_called_once_with(
-                ANY, ANY, url, tmpdirname + "/index.html", ANY
-            )
-            assert fut.result.called
-
-
-def test_download_failed() -> None:
-    with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
-        with patch(
-            "setupr.get_url.ThreadPoolExecutor"
-        ) as mocked_ThreadPoolExecutor:
-            pool = MagicMock(spec=ThreadPoolExecutor)
-            fut = Mock()
-            fut.result = Mock(side_effect=requests.exceptions.RequestException)
-            pool.submit = Mock(return_value=fut)
-            mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
-                return_value=pool
-            )
-
-            url = "https://worldr.com/index.html"
-            with pytest.raises(requests.exceptions.RequestException):
-                download(
-                    [
-                        url,
-                    ],
-                    tmpdirname,
-                )
-
-            pool.submit.assert_called_once_with(
-                ANY, ANY, url, tmpdirname + "/index.html", ANY
-            )
-            assert fut.result.called
+        pool.submit.assert_called_once_with(
+            ANY, ANY, url, tmpdirname + "/index.html", ANY
+        )
+        assert fut.result.called
 
 
 def test_take_backup() -> None:
@@ -133,13 +137,13 @@ def test_take_backup() -> None:
 
 
 def test_take_backup_no_need() -> None:
-    with patch.object(pathlib.Path, "is_dir", lambda _: True):
+    with patch.object(pathlib.Path, "is_dir", return_value=True):
         sut = pathlib.Path("/file/does/not/exits/ever/no/really/it/does/not")
         bak = take_backup(sut)
         assert bak is sut
 
 
-@pytest.fixture
+@pytest.fixture()
 def downloader() -> Downloader:
     with patch("setupr.gpg.gnupg") as mock_gpg:
         mock_gpg.return_value = MagicMock(spec=gnupg.GPG)
@@ -149,17 +153,15 @@ def downloader() -> Downloader:
 
 
 @pytest.mark.parametrize(
-    "func,what,returned,expected",
+    ("func", "what", "returned", "expected"),
     [
-        ("_get_files", "install", True, True),
-        ("_get_files", "install", False, False),
         ("_get_files", "Elden Ring", True, False),
-        ("_get_files", "debug", True, True),
-        ("_get_files", "debug", False, False),
-        ("_get_files", "Elden Ring", True, False),
-        ("_get_files", "backup", True, True),
         ("_get_files", "backup", False, False),
-        ("_get_files", "Elden Ring", True, False),
+        ("_get_files", "backup", True, True),
+        ("_get_files", "debug", False, False),
+        ("_get_files", "debug", True, True),
+        ("_get_files", "install", False, False),
+        ("_get_files", "install", True, True),
     ],
 )
 def test_downloader_get_files(
@@ -175,7 +177,7 @@ def test_downloader_get_files(
 
 
 @pytest.mark.parametrize(
-    "sig,error,expected",
+    ("sig", "error", "expected"),
     [
         (True, None, True),
         (True, OSError("BooM"), False),
@@ -203,7 +205,7 @@ def test_get_files(
 
 
 @pytest.mark.parametrize(
-    "hash,error,expected",
+    ("hash", "error", "expected"),
     [
         (
             "4362bac71d971fc7d7b69a757de6fbcb5e1c513b393609043cae67b5341bd4af",
@@ -263,7 +265,7 @@ def test_execute_script_signature_failed(downloader: Downloader) -> None:
 
 
 @pytest.mark.parametrize(
-    "code, expected, stdout, stderr",
+    ("code", "expected", "stdout", "stderr"),
     [
         (1, False, b"a hunter must hunt", b"grant us eyes"),
         (0, True, b"", b""),

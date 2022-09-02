@@ -18,9 +18,6 @@ from setupr.commands import pgp_key, pre_flight
 from setupr.get_url import Downloader
 from setupr.print import COLOUR_INFO, wprint
 
-# Click.
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
-
 # Rich.
 install(show_locals=True)
 
@@ -227,7 +224,6 @@ def validate_semver(
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
     cls=HelpColorsCommand,
     help_headers_color="blue",
     help_options_color="magenta",
@@ -293,7 +289,7 @@ def validate_semver(
     "-v", "--version", is_flag=True, help="Print the version and exit"
 )
 @click.option("--verbose", is_flag=True, help="Print the logs to stdout")
-def main(  # noqa
+def main(
     install: click.Option,
     debug: click.Option,
     backup: click.Option,
@@ -316,8 +312,8 @@ def main(  # noqa
     logger = structlog.get_logger("setupr")
     logger.debug(
         "All the loggers",
-        loggers=[name for name in logging.root.manager.loggerDict],
-    )  # noqa
+        loggers=list(logging.root.manager.loggerDict),
+    )
 
     # logger.debug("ook")
     # logger.info("BOOM")
@@ -383,7 +379,7 @@ def main(  # noqa
         wprint(
             "You [i]must[/i] specify -i, -b, or -d and a semver version",
             level="warning",
-        )  # noqa
+        )
         logger.error("You must specify an option.")
         wprint("Operation failed.", level="failure")
         sys.exit(1)

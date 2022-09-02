@@ -7,7 +7,7 @@ tasks:
     desc: "Create the virtual environment via poetry"
     cmds:
       - poetry install
-    source:
+    sources:
       - pyproject.toml
       - poetry.lock
       - poetry.toml
@@ -76,8 +76,9 @@ tasks:
       - setupr/*.py
       - tests/*.py
   check-flake8:
-    desc: "Flake8 checks"
+    desc: "Flake8 checks — DEPRECATED use check-flakeheaven instead"
     cmds:
+      - echo "DEPRECATED use check-flakeheaven instead"
       - flake8 .
     sources:
       - setupr/*.py
@@ -118,9 +119,23 @@ tasks:
       - radon mi setupr/*.py
     sources:
       - setupr/*.py
+  check-ruff:
+    desc: "(experimental) Ruff checks"
+    cmds:
+      - ruff -v setupr/**/*.py tests/**/*.py
+    sources:
+      - setupr/**/*.py
+      - setupr/**/*.py
+  check-flakeheaven:
+    desc: "Flakeheaven checks, replaces flake8"
+    cmds:
+      - flakeheaven lint
+    sources:
+      - setupr/**/*.py
+      - setupr/**/*.py
   check:
     desc: "Runs all the checks"
-    deps: ["check-isort", "check-black", "check-flake8", "check-mypy", "check-docstyle", "check-docs", "check-bandit", "check-radon"]
+    deps: ["check-isort", "check-black", "check-flakeheaven", "check-mypy", "check-docstyle", "check-docs", "check-bandit", "check-radon", "check-ruff"]
   docs:
     desc: "Runs a mkdocs servedr on port 8000"
     cmds:
@@ -137,3 +152,6 @@ tasks:
       - tests/**/*
     generates:
       - dist/**/*
+  before-push:
+    desc: "Run all the checks before a push"
+    deps: ["format", "check", "tests"]

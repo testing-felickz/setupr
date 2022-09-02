@@ -16,9 +16,9 @@ from setupr.pre_flight import (
 )
 
 
-@pytest.mark.slow
+@pytest.mark.slow()
 @pytest.mark.parametrize(
-    "what,version,basename",
+    ("what", "version", "basename"),
     [
         ("install", "v3.6.1", "worldr-install-v3.6.1"),
         ("debug", "v0.10.0", "worldr-debug-v0.10.0"),
@@ -38,12 +38,13 @@ def test_get_real_scripts(what: str, version: str, basename: str) -> None:
 
     # Check that we have a PGP key.
     sut = Downloader()
-    if not sut._gpg.worldr_key_exists():  # pragma: no cover
-        if not sut._gpg.import_worldr_key():
-            pytest.skip(
-                "Worldr PGP key cannot be imported, "
-                "therefore this test cannot run."
-            )
+    if (
+        not sut._gpg.worldr_key_exists() and not sut._gpg.import_worldr_key()
+    ):  # pragma: no cover
+        pytest.skip(
+            "Worldr PGP key cannot be imported, "
+            "therefore this test cannot run."
+        )
 
     # Call.
     assert sut.get(f"{what}", f"{version}") is True
@@ -57,9 +58,9 @@ def test_get_real_scripts(what: str, version: str, basename: str) -> None:
     Path(f"{basename}.sig").unlink()
 
 
-@pytest.mark.slow
+@pytest.mark.slow()
 @pytest.mark.parametrize(
-    "file, url",
+    ("file", "url"),
     [
         ("goss-linux-amd64", f"{GOSS_URL}/{GOSS_VERSION}/{GOSS_EXE}"),
         (
@@ -90,7 +91,7 @@ def test_fetch_goss(file: str, url: str) -> None:
     Path(f"{file}").unlink()
 
 
-@pytest.mark.slow
+@pytest.mark.slow()
 def test_execute_script() -> None:
     """This does things for real and will take time."""
     with patch("setupr.get_url.Confirm") as mocked_confirm:

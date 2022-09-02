@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Requests to get thing from URL and verify their PGP signatures."""
 import logging
+import os
 import signal
 import stat
 from concurrent.futures import ThreadPoolExecutor
@@ -58,7 +59,7 @@ done_event = Event()
 
 def handle_sigint(
     signum: int, frame: Optional[FrameType]
-) -> None:  # pragma: no cover  # noqa
+) -> None:  # pragma: no cover
     """Handle SIGINT signal.
 
     There is little point in unit testing this function. A functional
@@ -83,7 +84,7 @@ def copy_url(task_id: TaskID, url: str, path: str, progress: Progress) -> None:
     progress.update(
         task_id, total=int(str(response.headers.get("content-length")))
     )
-    with open(path, "wb") as dest_file:
+    with os.fdopen(os.open(path, os.O_RDWR | os.O_CREAT), "wb") as dest_file:
         progress.start_task(task_id)
         for data in response.iter_content(chunk_size=4096):
             dest_file.write(data)
@@ -106,22 +107,21 @@ def download(urls: Iterable[str], dest_dir: str) -> None:
         "•",
         TimeRemainingColumn(),
     )
-    with progress:
-        with ThreadPoolExecutor(max_workers=4) as pool:
-            for url in urls:
-                filename = url.split("/")[-1]
-                dest_path = take_backup(Path(dest_dir) / Path(filename))
-                task_id = progress.add_task(
-                    "download", filename=filename, start=False
-                )
-                future = pool.submit(
-                    copy_url, task_id, url, dest_path.as_posix(), progress
-                )
-                try:
-                    future.result()
-                except Exception as ex:
-                    rlog.error("Download failed", url=url)
-                    raise ex
+    with progress, ThreadPoolExecutor(max_workers=4) as pool:
+        for url in urls:
+            filename = url.split("/")[-1]
+            dest_path = take_backup(Path(dest_dir) / Path(filename))
+            task_id = progress.add_task(
+                "download", filename=filename, start=False
+            )
+            future = pool.submit(
+                copy_url, task_id, url, dest_path.as_posix(), progress
+            )
+            try:
+                future.result()
+            except Exception as ex:
+                rlog.error("Download failed", url=url)
+                raise ex
 
 
 def take_backup(filename: Path) -> Path:

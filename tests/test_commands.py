@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 from unittest.mock import Mock, patch
 
 import pytest
@@ -9,7 +10,7 @@ from setupr.pre_flight import PreFlight
 
 
 @pytest.mark.parametrize(
-    "key_exists,imported,expected",
+    ("key_exists", "imported", "expected"),
     [
         (True, True, True),
         (False, True, True),
@@ -27,7 +28,7 @@ def test_pgp_key(key_exists, imported, expected, mock_console):
 
 
 @pytest.mark.parametrize(
-    "sec,infra,expected",
+    ("sec", "infra", "expected"),
     [
         (0, 0, True),
         (1, 0, True),

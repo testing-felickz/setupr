@@ -89,3 +89,7 @@ Setupr.
 This is why [conventional
 commits](https://www.conventionalcommits.org/en/v1.0.0/) are essential,
 especially in PR titles.
+
+## Linters
+
+We replaced flake8 by [flakehaven](https://github.com/flakeheaven/flakeheaven) ([docs](https://flakeheaven.readthedocs.io/en/latest/index.html)) which uses some [awesome flake8 plugins](https://github.com/DmytroLitvinov/awesome-flake8-extensions).

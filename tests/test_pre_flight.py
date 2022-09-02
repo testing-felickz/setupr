@@ -12,19 +12,20 @@ from setupr.pre_flight import PreFlight
 
 
 def test_home_bin():
-    with patch.object(pathlib.Path, "is_dir", lambda _: False):
-        with patch.object(pathlib.Path, "mkdir", lambda _: False):
-            _bin = pathlib.Path.home() / "bin"
-            if _bin in local.env.path:  # pragma: no cover
-                local.env.path.remove(_bin)
-            assert _bin not in local.env.path  # Just to make sure…
-            _ = PreFlight()  # No need to keep the instance.
-            assert _bin in local.env.path
+    with patch.object(
+        pathlib.Path, "is_dir", return_value=False
+    ), patch.object(pathlib.Path, "mkdir", return_value=False):
+        _bin = pathlib.Path.home() / "bin"
+        if _bin in local.env.path:  # pragma: no cover
+            local.env.path.remove(_bin)
+        assert _bin not in local.env.path  # Just to make sure…
+        _ = PreFlight()  # No need to keep the instance.
+        assert _bin in local.env.path
 
 
-@pytest.fixture
+@pytest.fixture()
 def preflight():
-    with patch.object(pathlib.Path, "is_dir", lambda _: True):
+    with patch.object(pathlib.Path, "is_dir", return_value=True):
         # Tests should never create a real directory.
         return PreFlight()
 
@@ -53,14 +54,14 @@ def test_goss_version_bad(preflight):
     preflight._downloader = MagicMock(spec=Downloader)
     with patch.object(
         pathlib.Path, "symlink_to", lambda x, _: "goss" in x.as_posix()
-    ):
-        with patch.object(
-            pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU
-        ):
-            with patch("setupr.pre_flight.local") as mlocal:
-                mlocal.__getitem__.return_value = mgoss
-                assert preflight.goss is mgoss
-                assert preflight._downloader.fetch.called
+    ), patch.object(
+        pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU
+    ), patch(
+        "setupr.pre_flight.local"
+    ) as mlocal:
+        mlocal.__getitem__.return_value = mgoss
+        assert preflight.goss is mgoss
+        assert preflight._downloader.fetch.called
 
 
 def test_PreFlight_goss_is_cached(preflight):
@@ -69,7 +70,7 @@ def test_PreFlight_goss_is_cached(preflight):
     assert preflight.goss is mgoss
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_preflight():
     with patch(
         "setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock
@@ -127,7 +128,10 @@ def test_run(retcode, mock_preflight):
 @patch("setupr.pre_flight.take_backup")
 def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
     mopen = mock_open()
-    with patch("setupr.pre_flight.open", mopen):
+    mfdopen = Mock()
+    with patch("setupr.pre_flight.os.open", mfdopen), patch(
+        "setupr.pre_flight.os.fdopen", mopen
+    ):
         m_take_backup.return_value = "xUnitTest"
         mgoss = MagicMock(spec=local)
         mgoss.run = Mock(side_effect=ProcessExecutionError("", 1, "", ""))
@@ -147,4 +151,5 @@ def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
         # If is_file is true, then we do not need to fetch it!
         assert mock_preflight._downloader.fetch.called is True
         assert m_take_backup.called
-        mopen.assert_called_once_with("xUnitTest", "w")
+        mfdopen.assert_called_once_with("xUnitTest", 66)
+        assert mopen.called

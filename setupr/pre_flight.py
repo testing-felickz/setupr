@@ -5,6 +5,7 @@ Note that plumbum does not have type hints. Please see the bug [Type hints
         for library #334 ](https://github.com/tomerfiliba/plumbum/issues/334)
 for more information.
 """
+import os
 import pathlib
 import stat
 from typing import Any
@@ -127,7 +128,7 @@ class PreFlight:
                 retcode=ex.retcode,
             )
             log = take_backup(pathlib.Path.cwd() / f"goss-{what}.log")
-            with open(log, "w") as f:
+            with os.fdopen(os.open(log, os.O_RDWR | os.O_CREAT), "w") as f:
                 f.write(ex.stdout)
                 f.write(ex.stderr)
             return int(ex.retcode)

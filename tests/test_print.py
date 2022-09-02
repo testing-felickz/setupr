@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 import pytest
 
 from setupr.print import wprint
@@ -13,7 +14,7 @@ TXT_FMT = (
 
 
 @pytest.mark.parametrize(
-    "level,extra,text",
+    ("level", "extra", "text"),
     [
         (None, None, TXT),
         ("note", None, TXT),

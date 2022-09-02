@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 from pathlib import Path, PurePath
 from unittest.mock import MagicMock, patch
 
@@ -8,7 +9,7 @@ import pytest
 from setupr.gpg import GPG
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocked_gpg():
     with patch("setupr.gpg.gnupg") as mock_gpg:
         mock_gpg.return_value = MagicMock(spec=gnupg.GPG)
@@ -118,12 +119,13 @@ def test_verify_for_real():
     it is beyond out control.
     """
     sut = GPG()
-    if not sut.worldr_key_exists():  # pragma: no cover
-        if not sut.import_worldr_key():
-            pytest.skip(
-                "Worldr PGP key cannot be imported, "
-                "therefore this test cannot run."
-            )
+    if (
+        not sut.worldr_key_exists() and not sut.import_worldr_key()
+    ):  # pragma: no cover
+        pytest.skip(
+            "Worldr PGP key cannot be imported, "
+            "therefore this test cannot run."
+        )
     filename = PurePath(
         Path(__file__).resolve().parent, "charon-lord-dunsany.txt"
     )
