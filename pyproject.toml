@@ -43,7 +43,7 @@ bandit = "^1.7.4"
 pytest-skip-slow = "^0.0.3"
 radon = "^5.1.0"
 commitizen = "^2.31.0"
-python-semantic-release = "7.29.7"
+python-semantic-release = "7.31.4"
 pytest-cov = "^3.0.0"
 pydocstyle = "^6.1.1"
 
