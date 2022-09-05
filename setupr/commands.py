@@ -33,9 +33,9 @@ def pgp_key() -> bool:
 def pre_flight() -> bool:
     """Pre flight check.
 
-    The security ones are advisory only so we can continue if they fail. On
-    the other hand, the infrastructure ones are mandatory and we cannot
-    continue if they fail.
+    The security ones are advisory only so we can continue if they fail.
+    On the other hand, the infrastructure ones are mandatory and we
+    cannot continue if they fail.
     """
     _pre_flight = PreFlight()
     if _pre_flight.security() != 0:

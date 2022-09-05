@@ -43,6 +43,10 @@ repos:
   hooks:
   - id: python-bandit-vulnerability-check
     args: [--verbose, --ini, .banditrc, --recursive, setupr]
+- repo: https://github.com/charliermarsh/ruff
+  rev: v0.0.25
+  hooks:
+    - id: lint
 #     ______
 # ___/ BASH \__________________________________________________________________
 - repo: https://github.com/lovesegfault/beautysh
@@ -72,14 +76,13 @@ repos:
   rev: v2.1.0
   hooks:
   - id: docker-compose-check
-#     ________________
-# ___/ GHA linting    \________________________________________________________
+#     _______________
+# ___/ GH linting    \_________________________________________________________
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.17.1
+  rev: 0.18.2
   hooks:
-  - id: check-jsonschema
-    name: "Check GitHub Workflows"
-    files: ^\.github/workflows/
-    exclude: ^\.github/workflows/run-checks/action.yml # GAH!
-    types: [yaml]
-    args: ["--verbose", "--schemafile", "https://json.schemastore.org/github-workflow"]
+    - id: check-github-actions
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.18.2
+  hooks:
+    - id: check-dependabot
