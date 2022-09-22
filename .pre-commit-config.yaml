@@ -7,6 +7,7 @@ repos:
   - id: trailing-whitespace
   - id: end-of-file-fixer
   - id: check-yaml
+    args: [--allow-multiple-documents]
   - id: check-json
   - id: check-toml
   - id: debug-statements  # Python only!
@@ -14,7 +15,7 @@ repos:
 #     __________________
 # ___/ Python specific. \______________________________________________________
 - repo: https://github.com/psf/black
-  rev: 22.6.0
+  rev: 22.8.0
   hooks:
   - id: black
 - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
@@ -31,7 +32,7 @@ repos:
   hooks:
   - id: isort
 - repo: https://github.com/myint/docformatter
-  rev: v1.4
+  rev: v1.5.0
   hooks:
   - id: docformatter
 - repo: https://gitlab.com/smop/pre-commit-hooks
@@ -44,7 +45,7 @@ repos:
   - id: python-bandit-vulnerability-check
     args: [--verbose, --ini, .banditrc, --recursive, setupr]
 - repo: https://github.com/charliermarsh/ruff
-  rev: v0.0.25
+  rev: v0.0.29
   hooks:
     - id: lint
 #     ______
@@ -54,13 +55,13 @@ repos:
   hooks:
   - id: beautysh
 - repo: https://github.com/jumanjihouse/pre-commit-hooks
-  rev: 2.1.6
+  rev: 3.0.0
   hooks:
   - id: shellcheck
 #     _______________
 # ___/ Markdown lint \_________________________________________________________
 - repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: v0.31.1
+  rev: v0.32.2
   hooks:
   - id: markdownlint
     args: [--ignore, CHANGELOG.md, -s, .mdl_style.rb]

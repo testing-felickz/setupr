@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # type: ignore
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -24,6 +25,7 @@ def test_help():
 def test_version():
     runner = CliRunner()
     result = runner.invoke(main, ["--version"])
+    assert result.exit_code == 0, f"CLI output: {result.output}"
     assert __version__ in result.output
 
 
@@ -38,7 +40,7 @@ def test_version():
 def test_mutually_exclusive(first, second):
     runner = CliRunner()
     result = runner.invoke(main, [first, SEMVER, second, SEMVER])
-    assert result.exit_code == 2
+    assert result.exit_code == 2, f"CLI output: {result.output}"
     assert "Illegal usage" in result.output
 
 
@@ -56,7 +58,7 @@ def test_mutually_exclusive(first, second):
 def test_semver(opt, value):
     runner = CliRunner()
     result = runner.invoke(main, [opt, value])
-    assert result.exit_code == 2
+    assert result.exit_code == 2, f"CLI output: {result.output}"
     assert "is not valid SemVer string" in result.output
 
 
@@ -127,11 +129,47 @@ def test_console(
     m_downloader.return_value = m_dlr
 
     runner = CliRunner()
-    result = runner.invoke(main, [opt, "1.2.3"])
-    assert result.exit_code == expected
+    result = runner.invoke(
+        main,
+        [
+            opt,
+            "1.2.3",
+            "--service-account",
+            f"{Path.cwd()}/tests/ranni-valid.sa.json",
+        ],
+    )
+    assert result.exit_code == expected, f"CLI output: {result.output}"
 
 
 def test_no_option():
     runner = CliRunner()
     result = runner.invoke(main, [])
     assert result.exit_code == 1
+
+
+def test_service_account_does_not_exist():
+    runner = CliRunner()
+    result = runner.invoke(main, ["-i", "1.2.3", "--service-account", "ook"])
+    assert result.exit_code == 2, f"CLI output: {result.output}"
+
+
+def test_service_account_cannot_be_found():
+    with patch("pathlib.Path.glob") as mock_glob:
+        mock_glob.return_value = []
+        runner = CliRunner()
+        result = runner.invoke(main, ["-i", "1.2.3"])
+        assert result.exit_code == 3, f"CLI output: {result.output}"
+
+
+def test_installation_data_is_invalid():
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "-i",
+            "1.2.3",
+            "--service-account",
+            f"{Path.cwd()}/tests/ranni-invalid.sa.json",
+        ],
+    )
+    assert result.exit_code == 4, f"CLI output: {result.output}"

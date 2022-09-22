@@ -129,13 +129,21 @@ tasks:
   check-flakeheaven:
     desc: "Flakeheaven checks, replaces flake8"
     cmds:
-      - flakeheaven lint
+      - flakeheaven lint setupr/**/*.py tests/*.py
     sources:
       - setupr/**/*.py
-      - setupr/**/*.py
+      - tests/**/*.py
   check:
     desc: "Runs all the checks"
-    deps: ["check-isort", "check-black", "check-flakeheaven", "check-mypy", "check-docstyle", "check-docs", "check-bandit", "check-radon", "check-ruff"]
+    deps: ["check-isort",
+           "check-black",
+           "check-flakeheaven",
+           "check-mypy",
+           "check-radon",
+           "check-ruff",
+           "check-docstyle",
+           "check-docs",
+           "check-bandit"]
   docs:
     desc: "Runs a mkdocs servedr on port 8000"
     cmds:

@@ -59,7 +59,7 @@ pytest.xml
 
 # Translations
 *.mo
-*.pot
+*.pottests/ranni-invalid.sa.json
 
 # Django stuff:
 *.log
@@ -175,3 +175,9 @@ goss-security.yaml
 
 # Ruff linter
 .ruff_cache/
+
+# Google service accounts.
+# THIS IS NOT GOOD ENOUGH!!!!
+**/*sa.json
+!tests/ranni-invalid.sa.json
+!tests/ranni-valid.sa.json

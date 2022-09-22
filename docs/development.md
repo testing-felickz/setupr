@@ -93,3 +93,30 @@ especially in PR titles.
 ## Linters
 
 We replaced flake8 by [flakehaven](https://github.com/flakeheaven/flakeheaven) ([docs](https://flakeheaven.readthedocs.io/en/latest/index.html)) which uses some [awesome flake8 plugins](https://github.com/DmytroLitvinov/awesome-flake8-extensions).
+
+## Worldr installation data YAML
+
+Do ensure that [yamllint](https://github.com/adrienverge/yamllint) returns without either errors or warnings:
+
+```bash
+yamllint --strict tests/test.env.yaml
+yamllint --strict worldr-env-schema.yaml
+```
+
+We use [ruamel.yaml](https://yaml.readthedocs.io/en/latest/index.html) for parsing.
+
+```python
+from pathlib import Path
+from ruamel.yaml import YAML
+yaml = YAML()
+data = yaml.load(Path("test.env.yaml"))
+```
+
+We use [Cerebus](https://docs.python-cerberus.org/en/stable/index.html#) as a schema-like validator for installation data YAML. There is a unit test to check that the schema is valid.
+
+```python
+from setupr.schema import WORLDR_INSTALLATION_DATA_SCHEMA
+    v = Validator(WORLDR_INSTALLATION_DATA_SCHEMA)
+    v.validate(YAML().load(Path("tests/test.env.yaml")))
+    print(v.errors)
+```

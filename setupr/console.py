@@ -3,8 +3,8 @@
 import logging
 import logging.config
 import sys
-import typing
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
 import click
 import semver  # type: ignore
@@ -15,11 +15,18 @@ from rich.traceback import install
 
 from setupr import __version__
 from setupr.commands import pgp_key, pre_flight
+from setupr.gbucket import InstallationData, InstallationDataError
 from setupr.get_url import Downloader
 from setupr.print import COLOUR_INFO, wprint
 
 # Rich.
 install(show_locals=True)
+
+EXIT_CODE_SUCCESS = 0
+EXIT_CODE_OPERATION_FAILED = 1
+EXIT_CODE_SCRIPT_FAILED = 2
+EXIT_CODE_SERVICE_ACCOUNT_FAILED = 3
+EXIT_CODE_YAML_DATA_FAILED = 4
 
 
 pre_chain = [
@@ -33,10 +40,10 @@ pre_chain = [
 ]
 
 
-def confirgure_logging(log_level: str, verbose: bool) -> None:
+def configure_logging(log_level: str, verbose: bool) -> None:
     """Configure all the logging."""
     # Logging levels
-    # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level  # noqa
+    # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level
     _lvl = {
         "critical": 50,
         "error": 40,
@@ -89,7 +96,7 @@ def confirgure_logging(log_level: str, verbose: bool) -> None:
                     "()": structlog.stdlib.ProcessorFormatter,
                     "processors": shared_processors
                     + [
-                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,  # noqa
+                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,  # noqa: E501
                         structlog.processors.JSONRenderer(),
                     ],
                     "foreign_pre_chain": pre_chain,
@@ -98,7 +105,7 @@ def confirgure_logging(log_level: str, verbose: bool) -> None:
                     "()": structlog.stdlib.ProcessorFormatter,
                     "processors": shared_processors
                     + [
-                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,  # noqa
+                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,  # noqa: E501
                         structlog.dev.ConsoleRenderer(colors=True),
                     ],
                     "foreign_pre_chain": pre_chain,
@@ -207,7 +214,7 @@ class MutuallyExclusiveOption(click.Option):
 
 def validate_semver(
     ctx: click.core.Context, param: click.Option, value: str
-) -> typing.Union[None, Any]:
+) -> Optional[Any]:
     """Validate the option is semver compliante.
 
     If the option is None, do nothing.
@@ -274,6 +281,17 @@ def validate_semver(
     ),
 )
 @click.option(
+    "-s",
+    "--service-account",
+    default=None,
+    type=click.Path(exists=True),
+    metavar="<X.sa.json>",
+    help=(
+        "The service account to use."
+        "if not provided, the program will guess…"
+    ),
+)
+@click.option(
     "-l",
     "--log-level",
     default="info",
@@ -289,10 +307,11 @@ def validate_semver(
     "-v", "--version", is_flag=True, help="Print the version and exit"
 )
 @click.option("--verbose", is_flag=True, help="Print the logs to stdout")
-def main(
+def main(  # noqa: C901
     install: click.Option,
     debug: click.Option,
     backup: click.Option,
+    service_account: str,
     log_level: str,
     version: bool,
     verbose: bool,
@@ -306,9 +325,9 @@ def main(
     # Version
     if version:
         click.echo(__version__)
-        sys.exit(0)
+        sys.exit(EXIT_CODE_SUCCESS)
 
-    confirgure_logging(log_level, verbose)
+    configure_logging(log_level, verbose)
     logger = structlog.get_logger("setupr")
     logger.debug(
         "All the loggers",
@@ -320,19 +339,48 @@ def main(
     # logger.warning("monkey")
     # logger.error("eek")
 
-    # gah = structlog.get_logger("setupr.gah")
-    # gah.error("urgh")
-
-    dlr = Downloader()
-
-    # sys.exit(0)
-
     console = Console()
     console.rule(f"[{COLOUR_INFO}]WORLDR setupr script")
 
+    # sys.exit(EXIT_CODE_SUCCESS)
+    dlr = Downloader()
+
     if install is not None:
+        data = None
+        try:
+            # import pdb; pdb.set_trace()
+            path = None
+            # We need to covert that option to a Path. We cannot set it as
+            # default to "" since that will cause an error at the click level:
+            # it will complain that this file does not exists. However, we
+            # should be able to not specify the option, so it could be None.
+            # However, then Path will raise because you cannot instanciate it
+            # with None. Urgh.
+            if service_account is None:
+                path = None
+            else:
+                path = Path(service_account)
+            data = InstallationData(service_account_json=path)
+            if data.validate():
+                wprint("YMAL installation data is valid.", level="info")
+            else:
+                wprint(
+                    "YAML installation data is not valid. We cannot proceed.",
+                    level="failure",
+                )
+                sys.exit(EXIT_CODE_YAML_DATA_FAILED)
+        except InstallationDataError as ex:
+            logger.error("Error", ex=ex)
+            wprint(f"{ex}.", level="failure")
+            sys.exit(EXIT_CODE_SERVICE_ACCOUNT_FAILED)
+
         wprint(
-            f"Downloading [i]installation[/i] script at version [b]{install}[/b]",  # noqa
+            f"Using service account file {data.service_account_json}.",
+            level="info",
+        )
+
+        wprint(
+            f"Downloading [i]installation[/i] script at version [b]{install}[/b]",  # noqa: E501
             level="info",
         )
         if (
@@ -342,11 +390,11 @@ def main(
         ):
             logger.error("Failure to get install script.", version=install)
             wprint("Operation failed.", level="failure")
-            sys.exit(1)
+            sys.exit(EXIT_CODE_OPERATION_FAILED)
         if not dlr.execute_script("worldr-install", f"v{install}"):
             logger.error("Failure to execute install script.", version=install)
             wprint("Installation script failed.", level="failure")
-            sys.exit(2)
+            sys.exit(EXIT_CODE_SCRIPT_FAILED)
         logger.info("Success", script="install")
 
     elif debug is not None:
@@ -357,22 +405,22 @@ def main(
         if not pgp_key() or not dlr.get("debug", f"v{debug}"):
             logger.error("Failure to get debug script.", version=debug)
             wprint("Operation failed.", level="failure")
-            sys.exit(1)
+            sys.exit(EXIT_CODE_OPERATION_FAILED)
         if not dlr.execute_script("worldr-debug", f"v{install}"):
             logger.error("Failure to execute debug script.", version=install)
             wprint("Debug script failed.", level="failure")
-            sys.exit(2)
+            sys.exit(EXIT_CODE_SCRIPT_FAILED)
         logger.info("Success", script="debug")
 
     elif backup is not None:
         wprint(
-            f"Downloading [i]backup & restore[/i] script at version [b]{backup}[/b]",  # noqa
+            f"Downloading [i]backup & restore[/i] script at version [b]{backup}[/b]",  # noqa: E501
             level="info",
         )
         if not pgp_key() or not dlr.get("backup", f"v{backup}"):
             logger.error("Failure to get backup script.", version=backup)
             wprint("Operation failed.", level="failure")
-            sys.exit(1)
+            sys.exit(EXIT_CODE_OPERATION_FAILED)
         logger.info("Success", script="backup-restore")
 
     else:
@@ -382,20 +430,11 @@ def main(
         )
         logger.error("You must specify an option.")
         wprint("Operation failed.", level="failure")
-        sys.exit(1)
+        sys.exit(EXIT_CODE_OPERATION_FAILED)
 
     wprint("Operation was successful.", level="success")
-    sys.exit(0)
+    sys.exit(EXIT_CODE_SUCCESS)
 
 
 if __name__ == "__main__":  # pragma: no cover
     main()
-{
-    "event": "stdout reader: <Thread(Thread-2 (_read_data), initial daemon)>",
-    "level": "debug",
-    "logger": "gnupg",
-    "timestamp": "2022-07-21T09:51:53.259904Z",
-    "filename": "gnupg.py",
-    "func_name": "_collect_output",
-    "lineno": 1062,
-}
