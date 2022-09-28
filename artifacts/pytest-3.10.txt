@@ -1,0 +1,32 @@
+........................................................................ [ 56%]
+........................................................                 [100%]
+- generated xml file: /home/runner/work/setupr/setupr/artifacts/pytest-3.10.xml -
+
+---------- coverage: platform linux, python 3.10.7-final-0 -----------
+Name                               Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------
+setupr/__init__.py                     4      0      0      0   100%
+setupr/commands.py                    34      0      8      0   100%
+setupr/console.py                    123      0     30      0   100%
+setupr/gbucket.py                     51      0     14      0   100%
+setupr/get_url.py                    141      0     48      0   100%
+setupr/gpg.py                         33      0     14      0   100%
+setupr/pre_flight.py                  65      0     12      0   100%
+setupr/print.py                       21      0     10      0   100%
+setupr/schema.py                       4      0      0      0   100%
+setupr/utils.py                        9      0      6      0   100%
+tests/conftest.py                     10      0      2      0   100%
+tests/test_commands.py                23      0      4      0   100%
+tests/test_console.py                 72      0      6      0   100%
+tests/test_gbucket.py                 53      0      8      0   100%
+tests/test_get_url.py                149      0     41      0   100%
+tests/test_get_url_functional.py      30      0      2      0   100%
+tests/test_gpg.py                     59      0      2      0   100%
+tests/test_pre_flight.py              78      0     15      0   100%
+tests/test_print.py                   11      0      2      0   100%
+tests/test_schema.py                   7      0      0      0   100%
+tests/test_utils.py                    7      0      0      0   100%
+------------------------------------------------------------------------------
+TOTAL                                984      0    224      0   100%
+
+128 passed in 8.42s
