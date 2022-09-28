@@ -22,7 +22,7 @@ jobs:
       - name: "Install Task"
         uses: arduino/setup-task@v1
         with:
-          repo-token: ${{ secrets.GH_TOKEN }}
+          repo-token: ${{ secrets.GH_TOKEN_SETUPR }}
           version: 3.x
 
       - name: "Run checks"
