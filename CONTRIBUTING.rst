@@ -103,13 +103,13 @@ development. Please note this documentation assumes you already have
 
    .. code-block:: bash
 
-        make lint
+        tast lint
 
 | 7. Now, validate that all unit tests are passing:
 
    .. code-block:: bash
 
-        make test
+        tast tests
 
 | 8. Before raising a pull request you should also run tox. This will run the
    tests across different versions of Python:

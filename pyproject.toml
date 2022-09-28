@@ -2,12 +2,17 @@
 name = "setupr"
 version = "0.2.0"
 description = "Setupr ships the Worldr infrastructure."
-authors = ["Dr Yann Golanski <fyg@worldr.com>"]
+authors = ["Dr Yann Golanski <ygg@worldr.com>"]
+keywords = ["worldr"]
+license = "MIT"
+homepage = "https://github.com/worldr/setupr"
 repository = "https://github.com/worldr/setupr"
-documentation = "https://worldr.github.io/setupr/"
 readme = "README.md"
 packages = [
   {include = "setupr"}
+]
+include = [
+    "LICENSE",
 ]
 
 [tool.poetry.dependencies]

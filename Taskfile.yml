@@ -6,7 +6,7 @@ tasks:
   venv:
     desc: "Create the virtual environment via poetry"
     cmds:
-      - poetry install
+      - poetry install --remove-untracked
     sources:
       - pyproject.toml
       - poetry.lock

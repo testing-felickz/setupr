@@ -66,62 +66,16 @@ jobs:
       with:
         github_token: ${{ secrets.PAT }}
 
-#
-#
-#    We might need some of these later on. It does not harm being commented out.
-#
-#
-#  publish:
-#      runs-on: ubuntu-latest
-#      needs: tox
-#      steps:
-#
-#        - name: "Check out"
-#          uses: actions/checkout@v3
-#          with:
-#            token: ${{ secrets.PAT }}
-#
-#        - name: "Set up the environment"
-#          uses: ./.github/workflows/setup-poetry-env
-#
-#        - name: "Set output"
-#          id: vars
-#          run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-#
-#        - name: "Build the release"
-#          run: |
-#            source .venv/bin/activate
-#            poetry version $RELEASE_VERSION
-#            task build
-#          env:
-#            RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-#
-#        - uses: stefanzweifel/git-auto-commit-action@v4
-#          with:
-#            add_options: '-u'
-#            status_options: '--untracked-files=no'
-#            commit_message: "chore(release): updated version"
-#
-#        - name: "Publish the release assets"
-#          uses: softprops/action-gh-release@v1
-#          if: startsWith(github.ref, 'refs/tags/')
-#          with:
-#            files: |
-#              dist/setupr-${{ github.event.inputs.release_tag }}-py3-none-any.whl
-#              dist/setupr-${{ github.event.inputs.release_tag }}.tar.gz
-#
-#   documentation:
-#     runs-on: ubuntu-latest
-#     needs: publish
-#     steps:
-#
-#       - name: "Check out"
-#         uses: actions/checkout@v3
-#
-#       - name: "Set up the environment"
-#         uses: ./.github/workflows/setup-poetry-env
-#
-#       - name: "Generate documentation"
-#         run: |
-#             source .venv/bin/activate
-#             mkdocs gh-deploy --force
+    # Official docss! https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+
+    - name: "Publish distribution package to Test PyPI"
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+
+    - name: "Publish distribution package to PyPI"
+      if: startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
