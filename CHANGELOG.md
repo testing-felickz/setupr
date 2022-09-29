@@ -4,6 +4,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-09-29)
+### Feature
+* **release:** Support for PyPi releases ([#60](https://github.com/worldr/setupr/issues/60)) ([`7f148bd`](https://github.com/worldr/setupr/commit/7f148bdb3edf75efeda8630aa35276fbb5ce4ea8))
+* **installation:** Automatically get installation data ([#58](https://github.com/worldr/setupr/issues/58)) ([`634758f`](https://github.com/worldr/setupr/commit/634758fd9a72530d67089e5ba4e8ad7541aae828))
+* **execute:** Execute downloaded installation and debug scripts ([#49](https://github.com/worldr/setupr/issues/49)) ([`947258d`](https://github.com/worldr/setupr/commit/947258d2ee684e5ad1bd3987c8fd9fe1482c291a))
+
+### Fix
+* **GHA:** New token ([`cbd4012`](https://github.com/worldr/setupr/commit/cbd40127466a571a25dde012b60a96c9df992714))
+* **GHA:** Dependabot coverage report ([#56](https://github.com/worldr/setupr/issues/56)) ([`18053e2`](https://github.com/worldr/setupr/commit/18053e2f16ada4bcacedaed63507f2c07f1b140f))
+
 ## v0.2.0 (2022-07-29)
 ### Feature
 * **archives:** Backups are moved to an archive folder ([`6bafa18`](https://github.com/worldr/setupr/commit/6bafa18a492bd8a54d34bb0857adc7886deecd3e))
