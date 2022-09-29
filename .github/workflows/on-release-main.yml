@@ -69,6 +69,11 @@ jobs:
       with:
         github_token: ${{ secrets.PAT }}
 
+    - name: "Poetry builds the package"
+      run: |
+        source .venv/bin/activate
+        poetry build --verbose
+
     # Official docss! https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
 
     - name: "Publish distribution package to Test PyPI"
