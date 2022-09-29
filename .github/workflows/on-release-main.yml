@@ -70,6 +70,7 @@ jobs:
         github_token: ${{ secrets.PAT }}
         REPOSITORY_USERNAME: __token__
         REPOSITORY_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        REPOSITORY_URL: https://pypi.org/project/setupr/
 
     # - name: "Set up the environment"
     #   uses: ./.github/workflows/setup-poetry-env

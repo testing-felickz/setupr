@@ -13,6 +13,7 @@ packages = [
 ]
 include = [
     "LICENSE",
+    "docs/assets/logo.png",
 ]
 
 [tool.poetry.dependencies]
