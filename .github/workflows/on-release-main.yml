@@ -68,9 +68,42 @@ jobs:
       uses: relekang/python-semantic-release@v7.31.4
       with:
         github_token: ${{ secrets.PAT }}
-        REPOSITORY_USERNAME: __token__
-        REPOSITORY_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        pypi_token: ${{ secrets.PYPI_API_TOKEN }}
+
+  publish:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: "Check out"
+        uses: actions/checkout@v3
+
+      - name: Set up the environment
+        uses: ./.github/workflows/setup-poetry-env
+
+      - name: "Install Task"
+        uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+
+      - name: "Publish to TEST PyPi"
+        run: |
+          source .venv/bin/activate
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_API_TOKEN }}
+          poetry publish --verbose -r test-pypi
+
+      - name: "Dry run publish to PyPi"
+        run: |
+          source .venv/bin/activate
+          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+          poetry publish --verbose --dry-run
+
+      - name: "Publish to PyPi"
+        run: |
+          source .venv/bin/activate
+          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+          poetry publish --verbose
 
     # - name: "Set up the environment"
     #   uses: ./.github/workflows/setup-poetry-env
