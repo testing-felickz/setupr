@@ -86,45 +86,26 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           version: 3.x
 
-      - name: "Publish to TEST PyPi"
+      - name: "Poetry build package"
+        run: |
+          source .venv/bin/activate
+          poetry build --verbose
+
+      - name: "Poetry publish to TEST PyPi"
         run: |
           source .venv/bin/activate
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_API_TOKEN }}
           poetry publish --verbose -r test-pypi
 
-      - name: "Dry run publish to PyPi"
+      - name: "Poetry dry run publish to PyPi"
         run: |
           source .venv/bin/activate
           poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
           poetry publish --verbose --dry-run
 
-      - name: "Publish to PyPi"
+      - name: "Poetry publish to PyPi"
         run: |
           source .venv/bin/activate
           poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
           poetry publish --verbose
-
-    # - name: "Set up the environment"
-    #   uses: ./.github/workflows/setup-poetry-env
-    #   with:
-    #     python-version: 3.10
-
-    # - name: "Poetry builds the package"
-    #   run: |
-    #     source .venv/bin/activate
-    #     poetry build --verbose
-
-    # # Official docss! https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
-
-    # - name: "Publish distribution package to Test PyPI"
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #   with:
-    #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-    #     repository_url: https://test.pypi.org/legacy/
-
-    # - name: "Publish distribution package to PyPI"
-    #   if: startsWith(github.ref, 'refs/tags')
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #   with:
-    #     password: ${{ secrets.PYPI_API_TOKEN }}
