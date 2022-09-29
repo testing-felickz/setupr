@@ -9,49 +9,49 @@ name: release-main
 
 jobs:
 
-  quality:
-    runs-on: ubuntu-latest
-    steps:
+  # quality:
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-      - name: "Check out"
-        uses: actions/checkout@v3
+  #     - name: "Check out"
+  #       uses: actions/checkout@v3
 
-      - name: Set up the environment
-        uses: ./.github/workflows/setup-poetry-env
+  #     - name: Set up the environment
+  #       uses: ./.github/workflows/setup-poetry-env
 
-      - name: "Install Task"
-        uses: arduino/setup-task@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          version: 3.x
+  #     - name: "Install Task"
+  #       uses: arduino/setup-task@v1
+  #       with:
+  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
+  #         version: 3.x
 
-      - name: "Run checks"
-        uses: ./.github/workflows/run-checks
+  #     - name: "Run checks"
+  #       uses: ./.github/workflows/run-checks
 
-  tox:
-    needs: quality
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10']
-    steps:
-      - name: "Check out"
-        uses: actions/checkout@v3
+  # tox:
+  #   needs: quality
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version: ['3.7', '3.8', '3.9', '3.10']
+  #   steps:
+  #     - name: "Check out"
+  #       uses: actions/checkout@v3
 
-      - name: "Set up the environment"
-        uses: ./.github/workflows/setup-poetry-env
-        with:
-          python-version: ${{ matrix.python-version }}
+  #     - name: "Set up the environment"
+  #       uses: ./.github/workflows/setup-poetry-env
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
 
-      - name: "Test with tox"
-        run: |
-          source .venv/bin/activate
-          poetry add "tox-gh-actions==v2.9.1"
-          tox
+  #     - name: "Test with tox"
+  #       run: |
+  #         source .venv/bin/activate
+  #         poetry add "tox-gh-actions==v2.9.1"
+  #         tox
 
   release:
     # https://github.com/relekang/python-semantic-release/issues/311
-    needs: tox
+    # needs: tox
     runs-on: ubuntu-latest
     concurrency: release
     permissions:
