@@ -11,6 +11,7 @@ import semver  # type: ignore
 import structlog
 from click_help_colors import HelpColorsCommand  # type: ignore
 from rich.console import Console
+from rich.prompt import Confirm
 from rich.traceback import install
 
 from setupr import __version__
@@ -18,6 +19,7 @@ from setupr.commands import pgp_key, pre_flight
 from setupr.gbucket import InstallationData, InstallationDataError
 from setupr.get_url import Downloader
 from setupr.print import COLOUR_INFO, wprint
+from setupr.utils import VersionCheck, check_if_latest_version
 
 # Rich.
 install(show_locals=True)
@@ -219,8 +221,8 @@ def validate_semver(
 
     If the option is None, do nothing.
     """
-    logger = structlog.get_logger("setupr")
-    logger.debug("params", ctx=ctx, param=param, value=value)
+    # logger = structlog.get_logger("setupr")
+    # logger.debug("params", ctx=ctx, param=param, value=value)
     if value is None:
         return None
     try:
@@ -334,13 +336,29 @@ def main(  # noqa: C901
         loggers=list(logging.root.manager.loggerDict),
     )
 
-    # logger.debug("ook")
-    # logger.info("BOOM")
-    # logger.warning("monkey")
-    # logger.error("eek")
-
     console = Console()
     console.rule(f"[{COLOUR_INFO}]WORLDR setupr script")
+
+    # Version check.
+    check = check_if_latest_version()
+    if check == VersionCheck.LATEST:
+        wprint(f"This is the latest version {__version__}.", level="info")
+    elif check == VersionCheck.LAGGING:
+        wprint(
+            "there is a new version available: please update.", level="warning"
+        )
+        if Confirm.ask("Exit and update?", default=True):
+            wprint(
+                "Please run [i]python -m pip install -U setupr[/i]",
+                level="info",
+            )
+            sys.exit(EXIT_CODE_SUCCESS)
+        wprint("Proceeding with old version…", level="warning")
+    elif check == VersionCheck.UNKNOWN:
+        wprint("Could not check for newer versons.", level="warning")
+    else:  # pragma: no cover
+        # This should never, ever happen!
+        wprint("This is bug, please report!", level="error")
 
     # sys.exit(EXIT_CODE_SUCCESS)
     dlr = Downloader()

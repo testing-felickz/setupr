@@ -12,6 +12,7 @@ from click.testing import CliRunner
 from setupr import __version__
 from setupr.console import main, validate_semver
 from setupr.get_url import Downloader
+from setupr.utils import VersionCheck
 
 SEMVER = "1.2.3"
 
@@ -173,3 +174,31 @@ def test_installation_data_is_invalid():
         ],
     )
     assert result.exit_code == 4, f"CLI output: {result.output}"
+
+
+@pytest.mark.parametrize(
+    ("ask", "check", "code"),
+    [
+        (True, VersionCheck.LATEST, 3),
+        (True, VersionCheck.UNKNOWN, 3),
+        (True, VersionCheck.LAGGING, 0),
+        (False, VersionCheck.LAGGING, 3),
+    ],
+)
+def test_setupr_version_status(ask, check, code):
+    with patch("setupr.console.check_if_latest_version") as mock_check, patch(
+        "setupr.console.Confirm.ask"
+    ) as mock_ask:
+        mock_ask.return_value = ask
+        mock_check.return_value = check
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                "-i",
+                "1.2.3",
+            ],
+        )
+        # We need to check an error further down the stack since
+        # a version unknown is fine for running setupr.
+        assert result.exit_code == code, f"CLI output: {result.output}"

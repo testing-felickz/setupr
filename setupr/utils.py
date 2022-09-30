@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 """Utilities."""
+import enum
 from typing import Any, Sequence
+
+import requests
+
+from setupr import __version__
+
+GITHUB_URL = "https://api.github.com/repos/worldr/setupr/releases/latest"
+
+
+class VersionCheck(enum.Enum):
+    """Version check ENUM."""
+
+    LATEST = enum.auto()
+    LAGGING = enum.auto()
+    UNKNOWN = enum.auto()
 
 
 def join_with_oxford_commas(obj_list: Sequence[Any]) -> str:
@@ -20,3 +35,14 @@ def join_with_oxford_commas(obj_list: Sequence[Any]) -> str:
             ", ".join(str(obj) for obj in obj_list[: size - 1])
             + f", and {str(obj_list[size - 1])}"
         )
+
+
+def check_if_latest_version() -> VersionCheck:
+    """Check if there is a new version published on GitHub."""
+    response = requests.get(GITHUB_URL)
+    if response.status_code == 200:
+        latest_version = response.json()["tag_name"]
+        if latest_version == f"v{__version__}":
+            return VersionCheck.LATEST
+        return VersionCheck.LAGGING
+    return VersionCheck.UNKNOWN
