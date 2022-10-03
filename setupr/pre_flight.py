@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright © 2022-present Worldr Technologies Limited. All Rights Reserved.
 """Wrapper to goss.
 
 Note that plumbum does not have type hints. Please see the bug [Type hints

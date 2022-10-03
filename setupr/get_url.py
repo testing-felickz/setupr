@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright © 2022-present Worldr Technologies Limited. All Rights Reserved.
 """Requests to get thing from URL and verify their PGP signatures."""
 import logging
 import os

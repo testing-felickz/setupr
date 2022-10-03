@@ -44,10 +44,10 @@ repos:
   hooks:
   - id: python-bandit-vulnerability-check
     args: [--verbose, --ini, .banditrc, --recursive, setupr]
-- repo: https://github.com/charliermarsh/ruff
-  rev: v0.0.29
-  hooks:
-    - id: lint
+#- repo: https://github.com/charliermarsh/ruff
+#  rev: v0.0.48
+#  hooks:
+#    - id: lint
 #     ______
 # ___/ BASH \__________________________________________________________________
 - repo: https://github.com/lovesegfault/beautysh
@@ -80,10 +80,10 @@ repos:
 #     _______________
 # ___/ GH linting    \_________________________________________________________
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.18.2
+  rev: 0.18.3
   hooks:
     - id: check-github-actions
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.18.2
+  rev: 0.18.3
   hooks:
     - id: check-dependabot

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright © 2022-present Worldr Technologies Limited. All Rights Reserved.
 from pathlib import Path
 
 from cerberus import Validator  # type: ignore

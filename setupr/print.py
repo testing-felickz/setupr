@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright © 2022-present Worldr Technologies Limited. All Rights Reserved.
 """Wrapper to all console output."""
 
 from rich.console import Console
