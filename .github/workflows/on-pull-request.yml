@@ -80,6 +80,8 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     needs: matrix
     steps:
       - name: "Check out"
