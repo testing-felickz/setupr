@@ -1507,7 +1507,7 @@ python-versions = "*"
 
 [[package]]
 name = "python-semantic-release"
-version = "7.31.4"
+version = "7.32.0"
 description = "Automatic Semantic Versioning for Python projects"
 category = "dev"
 optional = false
@@ -2047,7 +2047,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "41a324542c30ca9b044de2498d7a5157426c8287339c6641867160169f001088"
+content-hash = "57db73c9226c1a5b3395a7be7245eecf0a7a7e5b8bda3cae8fa333dc0a4f7bf5"
 
 [metadata.files]
 appnope = [
@@ -2888,8 +2888,8 @@ python-gnupg = [
     {file = "python_gnupg-0.5.0-py2.py3-none-any.whl", hash = "sha256:345723a03e67b82aba0ea8ae2328b2e4a3906fbe2c18c4082285c3b01068f270"},
 ]
 python-semantic-release = [
-    {file = "python-semantic-release-7.31.4.tar.gz", hash = "sha256:ee00c396b6d394b87b5ba3cf6be0f759f2f23783c2215e3ac4c22dc4bc676d60"},
-    {file = "python_semantic_release-7.31.4-py3-none-any.whl", hash = "sha256:05d37cb3e3b6e84770128debede8421b24fceaecfbaa9eb62ffcfc1ea2c857f2"},
+    {file = "python-semantic-release-7.32.0.tar.gz", hash = "sha256:e74087107e6c03478cc8672b561cc7b88a91ee0f528fd327112a90f6c684439d"},
+    {file = "python_semantic_release-7.32.0-py3-none-any.whl", hash = "sha256:a7e20d35e74b635762dc13f16e944d002bde849a23a088842d02422327416902"},
 ]
 pytzdata = [
     {file = "pytzdata-2020.1-py2.py3-none-any.whl", hash = "sha256:e1e14750bcf95016381e4d472bad004eef710f2d6417240904070b3d6654485f"},
