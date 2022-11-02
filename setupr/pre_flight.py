@@ -13,13 +13,10 @@ from typing import Any
 
 import distro
 import structlog
-from plumbum import (  # type: ignore
-    CommandNotFound,
-    ProcessExecutionError,
-    local,
-)
+from plumbum import ProcessExecutionError  # type: ignore
+from plumbum import CommandNotFound, local
 
-from setupr.get_url import Downloader, take_backup
+from setupr.downloader import Downloader, take_backup
 
 rlog = structlog.get_logger("setupr.pre_flight")
 

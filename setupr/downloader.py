@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
 from types import FrameType
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 import pendulum
 import requests
@@ -50,7 +50,7 @@ progress = Progress(
     TimeRemainingColumn(),
 )
 
-rlog = structlog.get_logger("setupr.get-url")
+rlog = structlog.get_logger("setupr.downloader")
 
 CHUNK_SIZE = 8 * 1024
 WORLDR_URL_INSTALL = "https://storage.googleapis.com/worldr-install"
@@ -177,7 +177,7 @@ class Downloader:
         """Download a file and its signature to verify it."""
         if what in ["install"]:
             rlog.info("Downloading installation script")
-            return self._get_files("worldr-install", version)
+            return self._get_files("worldr-aa", version)
         elif what in ["debug"]:
             rlog.info("Downloading debug script")
             return self._get_files("worldr-debug", version)
@@ -209,8 +209,13 @@ class Downloader:
             return False
         return True
 
-    def execute_script(self, what: str, version: str) -> bool:
-        """Execute the script what at version."""
+    def execute_script(  # noqa
+        self, what: str, version: str, ser_acc: str, values: List[str]
+    ) -> bool:
+        """Execute the script what at version.
+
+        Thisn is too complex. It should be refactored, somehow.
+        """
         # Get the script's name.
         script = f"{what}-{version}.sh"
         signature = f"{what}-{version}.sig"
@@ -240,26 +245,33 @@ class Downloader:
             spinner="moon",
             spinner_style=f"{COLOUR_INFO}",
         ):
-            proc = script.popen(close_fds=True)  # type: ignore
+            args = [ser_acc] + values
+            rlog.info("command arguments", args=args)
+            proc = script.popen(args, close_fds=True)  # type: ignore  # noqa
             for raw in proc.stdout:
                 line = raw.decode("utf-8").strip()
                 line_low = line.lower()
                 if "error" in line_low:
-                    console.log(f"[{COLOUR_FAIL}]script stdout: {line}")
+                    console.log(f"[{COLOUR_FAIL}]{script} stdout: {line}")
                 elif "warn" in line_low:
-                    console.log(f"[{COLOUR_WARN}]script stdout: {line}")
+                    console.log(f"[{COLOUR_WARN}]{script} stdout: {line}")
                 elif "success" in line_low:
-                    console.log(f"[{COLOUR_SUCC}]script stdout: {line}")
+                    console.log(f"[{COLOUR_SUCC}]{script} stdout: {line}")
                 else:
                     console.log(f"[{COLOUR_GREY}]script stdout: {line}")
+                rlog.info("stdout", script=script, line=line)
             out, err = proc.communicate()
             if out:
                 console.log(f"[{COLOUR_GREY}]final script stdout: {out}")
             if err:
-                console.log(f"[{COLOUR_FAIL}]final script stderr: {out}")
+                for line in err.splitlines():
+                    console.log(f"[{COLOUR_FAIL}]final script stderr: {line}")
+                    rlog.error("stderr", script=script, line=line)
             returnCode = proc.returncode
             if returnCode != 0:
                 wprint(f"Exit Code {returnCode}", level="failure")
+                rlog.error("Return Code", script=script, code=returnCode)
                 return False  # Script failed.
             wprint(f"Exit Code {returnCode}", level="success")
+            rlog.info("Return Code", script=script, code=returnCode)
         return True  # Script succeeded.

@@ -14,7 +14,7 @@ from setupr.gbucket import InstallationData, InstallationDataError
 def test_implicit_data() -> None:
     sut = InstallationData(PosixPath("EldenRing"))
     assert sut.bucket_name == "worldr-customer-EldenRing"
-    assert sut.blob_name == "./EldenRing.env.yaml"
+    assert sut.blob_name == "./EldenRing-values.yaml"
 
 
 @pytest.fixture()
@@ -28,7 +28,7 @@ def sut() -> InstallationData:
 def test_derived_data(sut: InstallationData) -> None:
     """Test derived data."""
     assert sut.bucket_name == "worldr-customer-xUnit-test"
-    assert sut.blob_name == "./xUnit-test.env.yaml"
+    assert sut.blob_name == "./xUnit-test-values.yaml"
 
 
 @pytest.mark.parametrize(
@@ -70,9 +70,9 @@ def test_get(
         assert sut.get() is expected
 
         m_blob.download_to_filename.assert_called_once_with(
-            "./xUnit-test.env.yaml"
+            "./xUnit-test-values.yaml"
         )
-        m_bucket.blob.assert_called_once_with("./xUnit-test.env.yaml")
+        m_bucket.blob.assert_called_once_with("xUnit-test-values.yaml")
         m_storage_client.bucket.assert_called_once_with(
             "worldr-customer-xUnit-test"
         )
@@ -82,39 +82,18 @@ def test_get(
 
 
 @pytest.mark.parametrize(
-    ("file", "expected"),
+    ("rget", "expected"),
     [
-        (("tests/ranni-valid.env.yaml"), True),
-        (("tests/ranni-invalid.env.yaml"), False),
+        (True, True),
+        (False, False),
     ],
 )
-def test_validate(file: str, expected: bool, sut: InstallationData) -> None:
-    """This touches real files.
-
-    It is easier than mocking everything.
-    """
-    sut.blob_name = file
-    assert sut.validate() is expected
-
-
-@pytest.mark.parametrize(
-    ("rget", "rval", "expected"),
-    [
-        (True, True, True),
-        (False, True, False),
-        (True, False, False),
-        (False, False, False),
-    ],
-)
-def test_fetch(
-    rget: bool, rval: bool, expected: bool, sut: InstallationData
-) -> None:
+def test_fetch(rget: bool, expected: bool, sut: InstallationData) -> None:
     sut.get = Mock(return_value=rget)  # type: ignore
-    sut.validate = Mock(return_value=rval)  # type: ignore
     assert sut.fetch() is expected
 
 
 def test_sa_is_path() -> None:
     sut = InstallationData(PosixPath("tests/EldenRing.sa.json"))
     assert sut.bucket_name == "worldr-customer-EldenRing"
-    assert sut.blob_name == "tests/EldenRing.env.yaml"
+    assert sut.blob_name == "tests/EldenRing-values.yaml"

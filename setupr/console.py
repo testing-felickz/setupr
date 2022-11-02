@@ -17,8 +17,8 @@ from rich.traceback import install
 
 from setupr import __version__
 from setupr.commands import pgp_key, pre_flight
+from setupr.downloader import Downloader
 from setupr.gbucket import InstallationData, InstallationDataError
-from setupr.get_url import Downloader
 from setupr.print import COLOUR_INFO, wprint
 from setupr.utils import VersionCheck, check_if_latest_version
 
@@ -380,11 +380,11 @@ def main(  # noqa: C901
             else:
                 path = Path(service_account)
             data = InstallationData(service_account_json=path)
-            if data.validate():
-                wprint("YMAL installation data is valid.", level="info")
+            if data.fetch():
+                wprint("Got YMAL installation data.", level="info")
             else:
                 wprint(
-                    "YAML installation data is not valid. We cannot proceed.",
+                    "YAML installation data was not found. We cannot proceed.",
                     level="failure",
                 )
                 sys.exit(EXIT_CODE_YAML_DATA_FAILED)
@@ -410,7 +410,12 @@ def main(  # noqa: C901
             logger.error("Failure to get install script.", version=install)
             wprint("Operation failed.", level="failure")
             sys.exit(EXIT_CODE_OPERATION_FAILED)
-        if not dlr.execute_script("worldr-install", f"v{install}"):
+        if not dlr.execute_script(
+            "worldr-aa",
+            f"v{install}",
+            data.service_account_json.as_posix(),  # type: ignore
+            [data.blob_name],
+        ):
             logger.error("Failure to execute install script.", version=install)
             wprint("Installation script failed.", level="failure")
             sys.exit(EXIT_CODE_SCRIPT_FAILED)
@@ -425,7 +430,7 @@ def main(  # noqa: C901
             logger.error("Failure to get debug script.", version=debug)
             wprint("Operation failed.", level="failure")
             sys.exit(EXIT_CODE_OPERATION_FAILED)
-        if not dlr.execute_script("worldr-debug", f"v{install}"):
+        if not dlr.execute_script("worldr-debug", f"v{install}", "", []):
             logger.error("Failure to execute debug script.", version=install)
             wprint("Debug script failed.", level="failure")
             sys.exit(EXIT_CODE_SCRIPT_FAILED)

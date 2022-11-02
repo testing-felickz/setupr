@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
 import pytest
 from plumbum import ProcessExecutionError, local
 
-from setupr.get_url import Downloader
+from setupr.downloader import Downloader
 from setupr.pre_flight import SHA256SUM, PreFlight
 
 

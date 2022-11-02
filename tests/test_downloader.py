@@ -20,11 +20,11 @@ from pendulum.parser import parse
 from pendulum.parsing.exceptions import ParserError
 from rich.progress import Progress, TaskID
 
-from setupr.get_url import Downloader, copy_url, download, take_backup
+from setupr.downloader import Downloader, copy_url, download, take_backup
 
 
 @pytest.mark.parametrize("is_set", [True, False])
-@patch("setupr.get_url.done_event")
+@patch("setupr.downloader.done_event")
 def test_copy_url(mocked_done_event: Mock, is_set: bool) -> None:
     mocked_done_event.is_set = Mock(return_value=is_set)  # Branch coverage.
     with tempfile.TemporaryDirectory(
@@ -39,7 +39,7 @@ def test_copy_url(mocked_done_event: Mock, is_set: bool) -> None:
         assert progress.update.called
 
 
-@patch("setupr.get_url.done_event")
+@patch("setupr.downloader.done_event")
 def test_copy_url_RequestException(mocked_done_event: Mock) -> None:
     mocked_done_event.is_set = Mock(return_value=False)  # Branch coverage.
     with tempfile.TemporaryDirectory(
@@ -59,7 +59,7 @@ def test_download() -> None:
     with tempfile.TemporaryDirectory(
         prefix="setupr_tests_"
     ) as tmpdirname, patch(
-        "setupr.get_url.ThreadPoolExecutor"
+        "setupr.downloader.ThreadPoolExecutor"
     ) as mocked_ThreadPoolExecutor:
         pool = MagicMock(spec=ThreadPoolExecutor)
         fut = Mock()
@@ -86,7 +86,7 @@ def test_download_failed() -> None:
     with tempfile.TemporaryDirectory(
         prefix="setupr_tests_"
     ) as tmpdirname, patch(
-        "setupr.get_url.ThreadPoolExecutor"
+        "setupr.downloader.ThreadPoolExecutor"
     ) as mocked_ThreadPoolExecutor:
         pool = MagicMock(spec=ThreadPoolExecutor)
         fut = Mock()
@@ -194,7 +194,7 @@ def test_get_files(
     expected: bool,
     downloader: Downloader,
 ) -> None:
-    with patch("setupr.get_url.download") as mocked_download:
+    with patch("setupr.downloader.download") as mocked_download:
         # This can override the return value if error is not None.
         mocked_download.side_effect = error
         downloader._gpg.validate_worldr_signature = MagicMock(return_value=sig)
@@ -206,7 +206,7 @@ def test_get_files(
 
 
 @pytest.mark.parametrize(
-    ("hash", "error", "expected"),
+    ("sha", "error", "expected"),
     [
         (
             "4362bac71d971fc7d7b69a757de6fbcb5e1c513b393609043cae67b5341bd4af",
@@ -231,36 +231,36 @@ def test_get_files(
     ],
 )
 def test_fetch(
-    hash: str,
+    sha: str,
     error: Optional[Exception],
     expected: bool,
     downloader: Downloader,
 ) -> None:
     dst = pathlib.Path(__file__).parent / "charon-lord-dunsany.txt"
-    with patch("setupr.get_url.download") as mocked_download:
+    with patch("setupr.downloader.download") as mocked_download:
         mocked_download.side_effect = error
-        assert downloader.fetch("/dev/null", dst, hash) is expected
+        assert downloader.fetch("/dev/null", dst, sha) is expected
         assert mocked_download.called
 
 
 def test_execute_script_do_not_execute(downloader: Downloader) -> None:
-    with patch("setupr.get_url.Confirm") as mocked_confirm:
+    with patch("setupr.downloader.Confirm") as mocked_confirm:
         mocked_confirm.ask = MagicMock(return_value=False)
         downloader._gpg.validate_worldr_signature = Mock()
         mocked_confirm.return_value = False
-        assert downloader.execute_script("test", "v1.2.3") is True
+        assert downloader.execute_script("test", "v1.2.3", "", []) is True
         assert not downloader._gpg.validate_worldr_signature.called
         assert mocked_confirm.ask.called
 
 
 def test_execute_script_signature_failed(downloader: Downloader) -> None:
-    with patch("setupr.get_url.Confirm") as mocked_confirm:
+    with patch("setupr.downloader.Confirm") as mocked_confirm:
         mocked_confirm.ask = MagicMock(return_value=True)
-        with patch("setupr.get_url.Console") as mocked_console:
+        with patch("setupr.downloader.Console") as mocked_console:
             downloader._gpg.validate_worldr_signature = Mock(
                 return_value=False
             )
-            assert downloader.execute_script("test", "v1.2.3") is False
+            assert downloader.execute_script("test", "v1.2.3", "", []) is False
             assert downloader._gpg.validate_worldr_signature.called
             assert not mocked_console.called
 
@@ -275,14 +275,14 @@ def test_execute_script_signature_failed(downloader: Downloader) -> None:
 def test_execute_script(
     code: int, expected: bool, stdout: str, stderr: str, downloader: Downloader
 ) -> None:
-    with patch("setupr.get_url.Confirm") as mocked_confirm:
+    with patch("setupr.downloader.Confirm") as mocked_confirm:
         mocked_confirm.ask = MagicMock(return_value=True)
-        with patch("setupr.get_url.Console") as mocked_console:
+        with patch("setupr.downloader.Console") as mocked_console:
             downloader._gpg.validate_worldr_signature = Mock(return_value=True)
             mConsole = MagicMock()
             mocked_console.return_value = mConsole
 
-            with patch("setupr.get_url.local") as mlocal:
+            with patch("setupr.downloader.local") as mlocal:
                 proc = Mock()
                 proc.stdout = [b"error", b"warn", b"success", b"info"]
                 proc.communicate = Mock(return_value=(stdout, stderr))
@@ -297,7 +297,10 @@ def test_execute_script(
 
                 mlocal.__getitem__.side_effect = side_effect
 
-                assert downloader.execute_script("test", "v1.2.3") is expected
+                assert (
+                    downloader.execute_script("test", "v1.2.3", "", [])
+                    is expected
+                )
 
             assert downloader._gpg.validate_worldr_signature.called
             assert mocked_console.called

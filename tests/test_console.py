@@ -12,7 +12,8 @@ from click.testing import CliRunner
 
 from setupr import __version__
 from setupr.console import main, validate_semver
-from setupr.get_url import Downloader
+from setupr.downloader import Downloader
+from setupr.gbucket import InstallationData
 from setupr.utils import VersionCheck
 
 SEMVER = "1.2.3"
@@ -65,14 +66,14 @@ def test_semver(opt, value):
 
 
 @pytest.mark.parametrize(
-    ("input", "expected", "error"),
+    ("incoming", "expected", "error"),
     [
         (None, None, None),
         ("1.2.3", "1.2.3", None),
         ("ook", None, UsageError),
     ],
 )
-def test_verify_semver(input, expected, error):
+def test_verify_semver(incoming, expected, error):
     """We are just testing that the callback works.
 
     We are not doing an exhaustive test of semver!
@@ -80,39 +81,42 @@ def test_verify_semver(input, expected, error):
     ctx = Mock(spec=Context)
     prm = Mock(spec=Option)
     if error is None:
-        assert validate_semver(ctx, prm, input) == expected
+        assert validate_semver(ctx, prm, incoming) == expected
     else:
         with pytest.raises(error):
-            assert validate_semver(ctx, prm, input) is None
+            assert validate_semver(ctx, prm, incoming) is None
 
 
 @pytest.mark.parametrize(
-    ("opt", "key", "checks", "get", "exec_ret_code", "expected"),
+    ("opt", "key", "checks", "get", "exec_ret_code", "yaml_data", "expected"),
     [
-        ("-b", False, None, False, True, 1),
-        ("-b", False, None, True, True, 1),
-        ("-b", True, None, False, True, 1),
-        ("-b", True, None, True, True, 0),
-        ("-d", False, None, False, True, 1),
-        ("-d", False, None, True, True, 1),
-        ("-d", True, None, False, True, 1),
-        ("-d", True, None, True, True, 0),
-        ("-d", True, None, True, False, 2),
-        ("-i", False, False, False, True, 1),
-        ("-i", False, False, True, True, 1),
-        ("-i", False, True, False, True, 1),
-        ("-i", False, True, True, True, 1),
-        ("-i", True, False, False, True, 1),
-        ("-i", True, False, True, True, 1),
-        ("-i", True, True, False, True, 1),
-        ("-i", True, True, True, True, 0),
-        ("-i", True, True, True, False, 2),
+        ("-b", False, None, False, True, True, 1),
+        ("-b", False, None, True, True, True, 1),
+        ("-b", True, None, False, True, True, 1),
+        ("-b", True, None, True, True, True, 0),
+        ("-d", False, None, False, True, True, 1),
+        ("-d", False, None, True, True, True, 1),
+        ("-d", True, None, False, True, True, 1),
+        ("-d", True, None, True, True, True, 0),
+        ("-d", True, None, True, False, True, 2),
+        ("-i", False, False, False, True, True, 1),
+        ("-i", False, False, True, True, True, 1),
+        ("-i", False, True, False, True, True, 1),
+        ("-i", False, True, True, True, True, 1),
+        ("-i", True, False, False, True, True, 1),
+        ("-i", True, False, True, True, True, 1),
+        ("-i", True, True, False, True, True, 1),
+        ("-i", True, True, True, True, True, 0),
+        ("-i", True, True, True, False, True, 2),
+        ("-i", True, True, True, True, False, 4),
     ],
 )
 @patch("setupr.console.pgp_key")
 @patch("setupr.console.pre_flight")
 @patch("setupr.console.Downloader")
+@patch("setupr.console.InstallationData")
 def test_console(
+    m_installation_data,
     m_downloader,
     m_pre_flight,
     m_pgp_key,
@@ -120,9 +124,15 @@ def test_console(
     key,
     checks,
     get,
+    yaml_data,
     exec_ret_code,
     expected,
 ):
+    m_data = Mock(spec=InstallationData)
+    m_data.service_account_json = Path("sa.json")
+    m_data.blob_name = "values.yaml"
+    m_data.fetch.return_value = yaml_data
+    m_installation_data.return_value = m_data
     m_pgp_key.return_value = key
     m_pre_flight.return_value = checks
     m_dlr = Mock(spec=Downloader)
@@ -161,20 +171,6 @@ def test_service_account_cannot_be_found():
         runner = CliRunner()
         result = runner.invoke(main, ["-i", "1.2.3"])
         assert result.exit_code == 3, f"CLI output: {result.output}"
-
-
-def test_installation_data_is_invalid():
-    runner = CliRunner()
-    result = runner.invoke(
-        main,
-        [
-            "-i",
-            "1.2.3",
-            "--service-account",
-            f"{Path.cwd()}/tests/ranni-invalid.sa.json",
-        ],
-    )
-    assert result.exit_code == 4, f"CLI output: {result.output}"
 
 
 @pytest.mark.parametrize(

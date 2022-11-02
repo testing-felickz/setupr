@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from setupr.get_url import Downloader
+from setupr.downloader import Downloader
 from setupr.pre_flight import (
     GOSS_EXE,
     GOSS_URL,
@@ -21,7 +21,7 @@ from setupr.pre_flight import (
 @pytest.mark.parametrize(
     ("what", "version", "basename"),
     [
-        ("install", "v3.6.1", "worldr-install-v3.6.1"),
+        ("install", "v3.9.95", "worldr-aa-v3.9.95"),
         ("debug", "v0.10.0", "worldr-debug-v0.10.0"),
         ("backup", "v3.7.9", "backup-restore-v3.7.9"),
     ],
@@ -104,10 +104,20 @@ def test_fetch_goss(file: str, url: str) -> None:
 
 
 @pytest.mark.slow()
-def test_execute_script() -> None:
+@pytest.mark.parametrize(
+    ("ret_code", "expected"),
+    [
+        (0, True),
+        (1, False),
+    ],
+)
+def test_execute_script(ret_code: int, expected: bool) -> None:
     """This does things for real and will take time."""
-    with patch("setupr.get_url.Confirm") as mocked_confirm:
+    with patch("setupr.downloader.Confirm") as mocked_confirm:
         mocked_confirm.ask = Mock(return_value=True)
         sut = Downloader()
-        assert sut.execute_script("tests/runme", "v1.0.0") is True
+        assert (
+            sut.execute_script("tests/runme", "v1.0.0", ret_code, [])
+            is expected
+        )
         assert mocked_confirm.ask.called
