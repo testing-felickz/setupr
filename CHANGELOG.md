@@ -4,6 +4,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2022-11-02)
+### Feature
+* **atomic-async:** Support atomic async installations [#6177530] ([#75](https://github.com/worldr/setupr/issues/75)) ([`0fe9052`](https://github.com/worldr/setupr/commit/0fe90525540fb2101c9a3a4cd1a212d206cf412b))
+* **copyright:** Added a notice ([#69](https://github.com/worldr/setupr/issues/69)) ([`9f271b9`](https://github.com/worldr/setupr/commit/9f271b92e2ceb7601601362ed47e1e037d6750a3))
+* **version:** Check if new version is available ([#62](https://github.com/worldr/setupr/issues/62)) ([`b3efb80`](https://github.com/worldr/setupr/commit/b3efb8047b4a74b2a57b67c7ee749c372345c657))
+
+### Fix
+* **pre-flight:** Support for RHEL and Ubuntu definition files [#6176452] ([#74](https://github.com/worldr/setupr/issues/74)) ([`281121c`](https://github.com/worldr/setupr/commit/281121c711bc93e3a990be7620f03236aa828a13))
+
 ## v0.3.0 (2022-09-29)
 ### Feature
 * **release:** Support for PyPi releases ([#60](https://github.com/worldr/setupr/issues/60)) ([`7f148bd`](https://github.com/worldr/setupr/commit/7f148bdb3edf75efeda8630aa35276fbb5ce4ea8))
