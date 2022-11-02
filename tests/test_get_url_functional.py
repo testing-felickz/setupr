@@ -65,17 +65,28 @@ def test_get_real_scripts(what: str, version: str, basename: str) -> None:
     [
         ("goss-linux-amd64", f"{GOSS_URL}/{GOSS_VERSION}/{GOSS_EXE}"),
         (
-            "goss-infrastructure.yaml",
-            f"{URL_BASE_CHECKS}/goss-infrastructure.yaml",
+            "goss-infrastructure-Ubuntu.yaml",
+            f"{URL_BASE_CHECKS}/goss-infrastructure-Ubuntu.yaml",
         ),
         (
-            "goss-security.yaml",
-            f"{URL_BASE_CHECKS}/goss-security.yaml",
+            "goss-security-Ubuntu.yaml",
+            f"{URL_BASE_CHECKS}/goss-security-Ubuntu.yaml",
+        ),
+        (
+            "goss-infrastructure-RHEL.yaml",
+            f"{URL_BASE_CHECKS}/goss-infrastructure-RHEL.yaml",
+        ),
+        (
+            "goss-security-RHEL.yaml",
+            f"{URL_BASE_CHECKS}/goss-security-RHEL.yaml",
         ),
     ],
 )
 def test_fetch_goss(file: str, url: str) -> None:
     """This does it all for real, iff we have access to the internet.
+
+    It tests that we can download all the goss definition files, and
+    that the checksum are correct.
 
     The test should tidy after itself.
     """

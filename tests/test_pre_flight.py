@@ -9,7 +9,7 @@ import pytest
 from plumbum import ProcessExecutionError, local
 
 from setupr.get_url import Downloader
-from setupr.pre_flight import PreFlight
+from setupr.pre_flight import SHA256SUM, PreFlight
 
 
 def test_home_bin():
@@ -114,7 +114,10 @@ def test_run(retcode, mock_preflight):
         mgoss.run.assert_called_once_with(
             (
                 "-g",
-                (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
+                (
+                    pathlib.Path.cwd()
+                    / f"goss-security-{mock_preflight.OS_TYPE}.yaml"
+                ).as_posix(),
                 "validate",
                 "--format",
                 "documentation",
@@ -142,7 +145,10 @@ def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
         mgoss.run.assert_called_once_with(
             (
                 "-g",
-                (pathlib.Path.cwd() / "goss-security.yaml").as_posix(),
+                (
+                    pathlib.Path.cwd()
+                    / f"goss-security-{mock_preflight.OS_TYPE}.yaml"
+                ).as_posix(),
                 "validate",
                 "--format",
                 "documentation",
@@ -154,3 +160,23 @@ def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
         assert m_take_backup.called
         mfdopen.assert_called_once_with("xUnitTest", 66)
         assert mopen.called
+
+
+@pytest.mark.parametrize(
+    ("os_type", "expected"),
+    [
+        ("ms-windows", "Unknown"),
+        ("rhel", "RHEL"),
+        ("ubuntu", "Ubuntu"),
+    ],
+)
+def test_os_type(os_type, expected):
+    with patch.object(pathlib.Path, "is_dir", return_value=True), patch(
+        "distro.id"
+    ) as m_distro:
+        # Tests should never create a real directory.
+        m_distro.return_value = os_type
+        sut = PreFlight()
+        assert sut.OS_TYPE == expected
+        assert f"goss-infrastructure-{expected}.yaml" in SHA256SUM
+        assert f"goss-security-{expected}.yaml" in SHA256SUM

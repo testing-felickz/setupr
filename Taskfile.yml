@@ -1,165 +1,168 @@
 ---
 # https://taskfile.dev/#/
-version: "3"
+version: '3'
 
 tasks:
-  venv:
-    desc: "Create the virtual environment via poetry"
-    cmds:
-      - poetry install --remove-untracked
-    sources:
-      - pyproject.toml
-      - poetry.lock
-      - poetry.toml
-    generates:
-      - .venv/bin/activate
-    status:
-      - test -f .venv/bin/activate
-    method: checksum
-  activate:
-    desc: "Activates the virtual environment if needed"
-    deps: ["venv"]
-    cmds:
-      - source .venv/bin/activate
-    status:
-      - test ! -z $VIRTUAL_ENV
-  tests-fast:
-    desc: "run all the fast tests, no coverage"
-    deps: ["activate"]
-    cmds:
-      - coverage run -m pytest --doctest-modules
-      - coverage combine
-      - coverage report -m
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  tests:
-    desc: "run all the tests and coverage"
-    cmds:
-      - coverage run --concurrency=thread -m pytest --doctest-modules --slow
-      - coverage combine
-      - coverage report -m
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  coverage-html:
-    desc: "Generates an HTML coverage report"
-    deps: ["tests"]
-    cmds:
-      - coverage html
-      - xdg-open ./htmlcov/index.html
-    sources:
-      - setupr/*.py
-      - tests/*.py
-    generates:
-      - htmlcov/index.html
-  format:
-    desc: "Formates the code"
-    cmds:
-      - isort --profile black .
-      - black .
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  check-isort:
-    desc: "Isort checks"
-    cmds:
-      - isort --profile black --check-only --diff .
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  check-black:
-    desc: "Black checks"
-    cmds:
-      - black --check .
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  check-flake8:
-    desc: "Flake8 checks — DEPRECATED use check-flakeheaven instead"
-    cmds:
-      - echo "DEPRECATED use check-flakeheaven instead"
-      - flake8 .
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  check-mypy:
-    desc: "Mypy checks"
-    cmds:
-      - mypy .
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  check-docs:
-    desc: "Checks documentation"
-    cmds:
-      - mkdocs build -s
-    sources:
-      - setupr/*.py
-      - tests/*.py
-      - mkdocs.yml
-      - docs/**/*.md
-  check-docstyle:
-    desc: "Checks documentation"
-    cmds:
-      - pydocstyle --verbose --count
-    sources:
-      - setupr/*.py
-      - tests/*.py
-  check-bandit:
-    desc: "Bandit security checks"
-    cmds:
-      - bandit --verbose --recursive setupr
-    sources:
-      - setupr/*.py
-  check-radon:
-    desc: "Radon checks"
-    cmds:
-      - radon cc --show-complexity --average setupr/*.py
-      - radon mi setupr/*.py
-    sources:
-      - setupr/*.py
-  check-ruff:
-    desc: "(experimental) Ruff checks"
-    cmds:
-      - ruff -v setupr/**/*.py tests/**/*.py
-    sources:
-      - setupr/**/*.py
-      - setupr/**/*.py
-  check-flakeheaven:
-    desc: "Flakeheaven checks, replaces flake8"
-    cmds:
-      - flakeheaven lint setupr/**/*.py tests/*.py
-    sources:
-      - setupr/**/*.py
-      - tests/**/*.py
-  check:
-    desc: "Runs all the checks"
-    deps: ["check-isort",
-           "check-black",
-           "check-flakeheaven",
-           "check-mypy",
-           "check-radon",
-           "check-ruff",
-           "check-docstyle",
-           "check-docs",
-           "check-bandit"]
-  docs:
-    desc: "Runs a mkdocs servedr on port 8000"
-    cmds:
-      - mkdocs serve
-    sources:
-      - docs/**/*
-  build:
-    desc: "Generates a distribution files"
-    cmds:
-      - poetry build --verbose
-    sources:
-      - docs/**/*
-      - setupr/**/*
-      - tests/**/*
-    generates:
-      - dist/**/*
-  before-push:
-    desc: "Run all the checks before a push"
-    deps: ["format", "check", "tests"]
+    venv:
+        desc: 'Create the virtual environment via poetry'
+        cmds:
+            - poetry install --sync
+        sources:
+            - pyproject.toml
+            - poetry.lock
+            - poetry.toml
+        generates:
+            - .venv/bin/activate
+        status:
+            - test -f .venv/bin/activate
+        method: checksum
+    activate:
+        desc: 'Activates the virtual environment if needed'
+        deps: ['venv']
+        cmds:
+            - source .venv/bin/activate
+        status:
+            - test ! -z $VIRTUAL_ENV
+    tests-fast:
+        desc: 'run all the fast tests, no coverage'
+        deps: ['activate']
+        cmds:
+            - coverage run -m pytest --doctest-modules
+            - coverage combine
+            - coverage report -m
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    tests:
+        desc: 'run all the tests and coverage'
+        cmds:
+            - coverage run --concurrency=thread -m pytest --doctest-modules --slow
+            - coverage combine
+            - coverage report -m
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    coverage-html:
+        desc: 'Generates an HTML coverage report'
+        deps: ['tests']
+        cmds:
+            - coverage html
+            - xdg-open ./htmlcov/index.html
+        sources:
+            - setupr/*.py
+            - tests/*.py
+        generates:
+            - htmlcov/index.html
+    format:
+        desc: 'Formates the code'
+        cmds:
+            - isort --profile black .
+            - black .
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    check-isort:
+        desc: 'Isort checks'
+        cmds:
+            - isort --profile black --check-only --diff .
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    check-black:
+        desc: 'Black checks'
+        cmds:
+            - black --check .
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    check-flake8:
+        desc: 'Flake8 checks — DEPRECATED use check-flakeheaven instead'
+        cmds:
+            - echo "DEPRECATED use check-flakeheaven instead"
+            - flake8 .
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    check-mypy:
+        desc: 'Mypy checks'
+        cmds:
+            - mypy .
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    check-docs:
+        desc: 'Checks documentation'
+        cmds:
+            - mkdocs build -s
+        sources:
+            - setupr/*.py
+            - tests/*.py
+            - mkdocs.yml
+            - docs/**/*.md
+    check-docstyle:
+        desc: 'Checks documentation'
+        cmds:
+            - pydocstyle --verbose --count
+        sources:
+            - setupr/*.py
+            - tests/*.py
+    check-bandit:
+        desc: 'Bandit security checks'
+        cmds:
+            - bandit --verbose --recursive setupr
+        sources:
+            - setupr/*.py
+    check-radon:
+        desc: 'Radon checks'
+        cmds:
+            - radon cc --show-complexity --average setupr/*.py
+            - radon mi setupr/*.py
+        sources:
+            - setupr/*.py
+    check-ruff:
+        desc: '(experimental) Ruff checks'
+        cmds:
+            - ruff -v setupr/*.py tests/*.py
+        sources:
+            - setupr/**/*.py
+            - setupr/**/*.py
+    check-flakeheaven:
+        desc: 'Flakeheaven checks, replaces flake8'
+        cmds:
+            - flakeheaven lint setupr/**/*.py tests/*.py
+        sources:
+            - setupr/**/*.py
+            - tests/**/*.py
+    check:
+        desc: 'Runs all the checks'
+        deps:
+            [
+                'check-isort',
+                'check-black',
+                'check-flakeheaven',
+                'check-mypy',
+                'check-radon',
+                'check-ruff',
+                'check-docstyle',
+                'check-docs',
+                'check-bandit',
+            ]
+    docs:
+        desc: 'Runs a mkdocs servedr on port 8000'
+        cmds:
+            - mkdocs serve
+        sources:
+            - docs/**/*
+    build:
+        desc: 'Generates a distribution files'
+        cmds:
+            - poetry build --verbose
+        sources:
+            - docs/**/*
+            - setupr/**/*
+            - tests/**/*
+        generates:
+            - dist/**/*
+    before-push:
+        desc: 'Run all the checks before a push'
+        deps: ['format', 'check', 'tests']
