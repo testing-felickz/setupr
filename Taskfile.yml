@@ -64,7 +64,8 @@ tasks:
     check-isort:
         desc: 'Isort checks'
         cmds:
-            - isort --profile black --check-only --diff .
+            - isort --profile black --check-only --diff ./setupr
+            - isort --profile black --check-only --diff ./tests
         sources:
             - setupr/*.py
             - tests/*.py

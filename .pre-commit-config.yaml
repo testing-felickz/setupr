@@ -15,7 +15,7 @@ repos:
     #     __________________
     # ___/ Python specific. \______________________________________________________
     - repo: https://github.com/psf/black
-      rev: 22.8.0
+      rev: 22.10.0
       hooks:
           - id: black
     - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
@@ -69,16 +69,16 @@ repos:
     #     ________________
     # ___/ Docker linters \________________________________________________________
     - repo: https://github.com/IamTheFij/docker-pre-commit
-      rev: v2.1.0
+      rev: v2.1.1
       hooks:
           - id: docker-compose-check
     #     _______________
     # ___/ GH linting    \_________________________________________________________
     - repo: https://github.com/python-jsonschema/check-jsonschema
-      rev: 0.18.3
+      rev: 0.18.4
       hooks:
           - id: check-github-actions
     - repo: https://github.com/python-jsonschema/check-jsonschema
-      rev: 0.18.3
+      rev: 0.18.4
       hooks:
           - id: check-dependabot
