@@ -241,7 +241,7 @@ class Downloader:
         script = local[f"{Path.cwd() / script}"]
         console.rule(f"[{COLOUR_INFO}]Executing {script} script")
         with console.status(
-            f"[{COLOUR_INFO}]Installing infrastructure… Please wait",
+            f"[{COLOUR_INFO}]Running {script} … Please wait",
             spinner="moon",
             spinner_style=f"{COLOUR_INFO}",
         ):

@@ -430,7 +430,7 @@ def main(  # noqa: C901
             logger.error("Failure to get debug script.", version=debug)
             wprint("Operation failed.", level="failure")
             sys.exit(EXIT_CODE_OPERATION_FAILED)
-        if not dlr.execute_script("worldr-debug", f"v{install}", "", []):
+        if not dlr.execute_script("worldr-debug", f"v{debug}", "", []):
             logger.error("Failure to execute debug script.", version=install)
             wprint("Debug script failed.", level="failure")
             sys.exit(EXIT_CODE_SCRIPT_FAILED)
