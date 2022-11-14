@@ -28,7 +28,7 @@ SHA256SUM = {
     "goss-linux-amd64": "827e354b48f93bce933f5efcd1f00dc82569c42a179cf2d384b040d8a80bfbfb",  # noqa: E501
     "goss-infrastructure-Unknown.yaml": "0000000000000000000000000000000000000000000000000000000000000000",  # noqa: E501
     "goss-infrastructure-RHEL.yaml": "ea338b801fc42f76acddacd8e0051a036c85de7c1404627d541ed38f9731776b",  # noqa: E501
-    "goss-infrastructure-Ubuntu.yaml": "ef45088bb00d9e00f54971dbbaf6c1b60f85a419cfc3ce1fdc80d0cabf403aeb",  # noqa: E501
+    "goss-infrastructure-Ubuntu.yaml": "44dfffec6f278554f2bebac52eef7e41c1750c73e9088927067302f0f41b463d",  # noqa: E501
     "goss-security-Unknown.yaml": "0000000000000000000000000000000000000000000000000000000000000000",  # noqa: E501
     "goss-security-RHEL.yaml": "084f3ceb22eb2d7546b1029dd2862b3fe85e4dcaf487bf02260612e06984541a",  # noqa: E501
     "goss-security-Ubuntu.yaml": "8c2d12b4dd6c555ec558e1d30f862bd352e44217dd6b3626208ad2840e0064fe",  # noqa: E501
