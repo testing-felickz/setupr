@@ -4,6 +4,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2022-11-14)
+### Feature
+* **python:** Support 3.11 ([#77](https://github.com/worldr/setupr/issues/77)) ([`9b80ab4`](https://github.com/worldr/setupr/commit/9b80ab47499a1e683bcae7166015553b1145f9cb))
+
+### Fix
+* **sha256sum:** Goss infrastructure checks updated to support Ubuntu 22.04 (Jammy Jellyfish) ([#80](https://github.com/worldr/setupr/issues/80)) ([`ddeab60`](https://github.com/worldr/setupr/commit/ddeab604ae86f0e1b36df9a22ad5b5e29ec72879))
+* **debug:** Script executes correctly ([#78](https://github.com/worldr/setupr/issues/78)) ([`5e946b7`](https://github.com/worldr/setupr/commit/5e946b75032e1de19ac47f7767e38bc969d2baa5))
+
 ## v0.4.0 (2022-11-02)
 ### Feature
 * **atomic-async:** Support atomic async installations [#6177530] ([#75](https://github.com/worldr/setupr/issues/75)) ([`0fe9052`](https://github.com/worldr/setupr/commit/0fe90525540fb2101c9a3a4cd1a212d206cf412b))
