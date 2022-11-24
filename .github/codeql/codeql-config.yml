@@ -7,5 +7,5 @@ paths:
     - tests
     - docs
 paths-ignore:
-    - .venv/
-    - .*cache/
+    - .venv/**
+    - .*cache/**
