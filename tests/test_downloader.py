@@ -14,13 +14,15 @@ import gnupg
 import pytest
 import requests
 import requests_mock
-
-# import requests_mock
 from pendulum.parser import parse
 from pendulum.parsing.exceptions import ParserError
 from rich.progress import Progress, TaskID
 
 from setupr.downloader import Downloader, copy_url, download, take_backup
+
+URL = "https://worldr.com/index.html"
+INDEX = "/index.html"
+FAKE_VERSION = "v1.2.3"
 
 
 @pytest.mark.parametrize("is_set", [True, False])
@@ -30,27 +32,25 @@ def test_copy_url(mocked_done_event: Mock, is_set: bool) -> None:
     with tempfile.TemporaryDirectory(
         prefix="setupr_tests_"
     ) as tmpdirname, requests_mock.Mocker() as mocked:
-        url = "https://worldr.com/index.html"
-        mocked.get(url, text="resp", headers={"content-length": "13"})
+        mocked.get(URL, text="resp", headers={"content-length": "13"})
         dst = tmpdirname + "/index.html"
         progress = MagicMock(spec=Progress)
-        copy_url(MagicMock(spec=TaskID), url, dst, progress)
+        copy_url(MagicMock(spec=TaskID), URL, dst, progress)
         assert progress.start_task.called
         assert progress.update.called
 
 
 @patch("setupr.downloader.done_event")
-def test_copy_url_RequestException(mocked_done_event: Mock) -> None:
+def test_copy_url_request_exception(mocked_done_event: Mock) -> None:
     mocked_done_event.is_set = Mock(return_value=False)  # Branch coverage.
     with tempfile.TemporaryDirectory(
         prefix="setupr_tests_"
     ) as tmpdirname, requests_mock.Mocker() as mocked:
-        url = "https://worldr.com/index.html"
-        mocked.get(url, text="resp", status_code=400)
-        dst = tmpdirname + "/index.html"
+        mocked.get(URL, text="resp", status_code=400)
+        dst = tmpdirname + INDEX
         progress = MagicMock(spec=Progress)
         with pytest.raises(requests.exceptions.RequestException):
-            copy_url(MagicMock(spec=TaskID), url, dst, progress)
+            copy_url(MagicMock(spec=TaskID), URL, dst, progress)
         assert not progress.start_task.called
         assert not progress.update.called
 
@@ -68,16 +68,15 @@ def test_download() -> None:
         mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
             return_value=pool
         )
-        url = "https://worldr.com/index.html"
         download(
             [
-                url,
+                URL,
             ],
             tmpdirname,
         )
 
         pool.submit.assert_called_once_with(
-            ANY, ANY, url, tmpdirname + "/index.html", ANY
+            ANY, ANY, URL, tmpdirname + INDEX, ANY
         )
         assert fut.result.called
 
@@ -96,31 +95,30 @@ def test_download_failed() -> None:
             return_value=pool
         )
 
-        url = "https://worldr.com/index.html"
         with pytest.raises(requests.exceptions.RequestException):
             download(
                 [
-                    url,
+                    URL,
                 ],
                 tmpdirname,
             )
 
         pool.submit.assert_called_once_with(
-            ANY, ANY, url, tmpdirname + "/index.html", ANY
+            ANY, ANY, URL, tmpdirname + INDEX, ANY
         )
         assert fut.result.called
 
 
 def test_take_backup() -> None:
     with tempfile.TemporaryDirectory(prefix="setupr_tests_") as tmpdirname:
-        file = pathlib.Path(tmpdirname, "test.txt")
-        with open(file, "w") as fp:
+        _file = pathlib.Path(tmpdirname, "test.txt")
+        with open(_file, "w") as fp:
             fp.write("created temporary file 0\n")
-        assert take_backup(file) == file
+        assert take_backup(_file) == _file
         all_files = glob(f"{tmpdirname}/archives/test*.txt")
         assert len(all_files) == 1, "There should be only one…"
         date_string = re.findall(
-            r"_[0-9]{4}-[0-9]{2}-[0-9]{2}T.*\.",
+            r"_\d{4}-\d{2}-\d{2}T.*\.",
             all_files[0],
             flags=re.IGNORECASE,
         )[0][1:-1]
@@ -201,7 +199,7 @@ def test_get_files(
         with patch.object(
             pathlib.Path, "chmod", lambda _, x: x == stat.S_IRWXU
         ):
-            assert downloader._get_files("test", "v1.2.3") is expected
+            assert downloader._get_files("test", FAKE_VERSION) is expected
         assert mocked_download.called
 
 
@@ -248,7 +246,7 @@ def test_execute_script_do_not_execute(downloader: Downloader) -> None:
         mocked_confirm.ask = MagicMock(return_value=False)
         downloader._gpg.validate_worldr_signature = Mock()
         mocked_confirm.return_value = False
-        assert downloader.execute_script("test", "v1.2.3", "", []) is True
+        assert downloader.execute_script("test", FAKE_VERSION, "", []) is True
         assert not downloader._gpg.validate_worldr_signature.called
         assert mocked_confirm.ask.called
 
@@ -260,7 +258,10 @@ def test_execute_script_signature_failed(downloader: Downloader) -> None:
             downloader._gpg.validate_worldr_signature = Mock(
                 return_value=False
             )
-            assert downloader.execute_script("test", "v1.2.3", "", []) is False
+            assert (
+                downloader.execute_script("test", FAKE_VERSION, "", [])
+                is False
+            )
             assert downloader._gpg.validate_worldr_signature.called
             assert not mocked_console.called
 
@@ -279,8 +280,8 @@ def test_execute_script(
         mocked_confirm.ask = MagicMock(return_value=True)
         with patch("setupr.downloader.Console") as mocked_console:
             downloader._gpg.validate_worldr_signature = Mock(return_value=True)
-            mConsole = MagicMock()
-            mocked_console.return_value = mConsole
+            m_console = MagicMock()
+            mocked_console.return_value = m_console
 
             with patch("setupr.downloader.local") as mlocal:
                 proc = Mock()
@@ -292,13 +293,15 @@ def test_execute_script(
 
                 def side_effect(x):
                     assert "test" in x, "script does not have test in name"
-                    assert "v1.2.3" in x, "script does not have version v1.2.3"
+                    assert (
+                        FAKE_VERSION in x
+                    ), "script does not have version v1.2.3"
                     return script
 
                 mlocal.__getitem__.side_effect = side_effect
 
                 assert (
-                    downloader.execute_script("test", "v1.2.3", "", [])
+                    downloader.execute_script("test", FAKE_VERSION, "", [])
                     is expected
                 )
 

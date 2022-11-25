@@ -77,6 +77,7 @@ def configure_logging(log_level: str, verbose: bool) -> None:
         """Filter log entries on verbose flag."""
 
         def __init__(self, param: str = "") -> None:
+            """Initialise."""
             self.param = param
             super()
 
@@ -196,10 +197,10 @@ class MutuallyExclusiveOption(click.Option):
     def __init__(self, *args, **kwargs):  # type: ignore
         """Initialize."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
-        help = kwargs.get("help", "")
+        _help = kwargs.get("help", "")
         if self.mutually_exclusive:  # pragma: no cover
             ex_str = ", ".join(self.mutually_exclusive)
-            kwargs["help"] = help + (
+            kwargs["help"] = _help + (
                 " NOTE: This argument is mutually exclusive with "
                 " arguments: [" + ex_str + "]."
             )
@@ -222,8 +223,6 @@ def validate_semver(
 
     If the option is None, do nothing.
     """
-    # logger = structlog.get_logger("setupr")
-    # logger.debug("params", ctx=ctx, param=param, value=value)
     if value is None:
         return None
     try:
@@ -325,11 +324,12 @@ def main(  # noqa: C901
     different for all the scripts. Please check the user documentation
     for the exact values.
     """
-    # Version
+    # Prints the current version and exits.
     if version:
         click.echo(__version__)
         sys.exit(EXIT_CODE_SUCCESS)
 
+    # Configure logging.
     configure_logging(log_level, verbose)
     logger = structlog.get_logger("setupr")
     logger.debug(
@@ -337,10 +337,36 @@ def main(  # noqa: C901
         loggers=list(logging.root.manager.loggerDict),
     )
 
+    # Configure the console.
     console = Console()
     console.rule(f"[{COLOUR_INFO}]WORLDR setupr script")
 
-    # Version check.
+    # Check latest version.
+    _version_check()
+
+    # Run commands.
+    if install is not None:
+        _install(logger, service_account)
+    elif debug is not None:
+        _debug(logger, debug)
+    elif backup is not None:
+        _backup(logger, backup)
+    else:
+        wprint(
+            "You [i]must[/i] specify -i, -b, or -d and a semver version",
+            level="warning",
+        )
+        logger.error("You must specify an option.")
+        wprint("You must specify an option.", level="failure")
+        sys.exit(EXIT_CODE_OPERATION_FAILED)
+
+    # We should be done…
+    wprint("Operation was successful.", level="success")
+    sys.exit(EXIT_CODE_SUCCESS)
+
+
+def _version_check() -> None:
+    """Check if we are running the latest verion from GitHub."""
     check = check_if_latest_version()
     if check == VersionCheck.LATEST:
         wprint(f"This is the latest version {__version__}.", level="info")
@@ -361,103 +387,101 @@ def main(  # noqa: C901
         # This should never, ever happen!
         wprint("This is bug, please report!", level="error")
 
-    # sys.exit(EXIT_CODE_SUCCESS)
+
+def _install(logger: Any, service_account: str) -> None:
+    """Run the install command.
+
+    https://www.structlog.org/en/stable/typing.html#type-hints
+
+    This explains why we are using Any for the logger.
+    """
     dlr = Downloader()
-
-    if install is not None:
-        data = None
-        try:
-            # import pdb; pdb.set_trace()
+    data = None
+    try:
+        path = None
+        # We need to covert that option to a Path. We cannot set it as
+        # default to "" since that will cause an error at the click level:
+        # it will complain that this file does not exists. However, we
+        # should be able to not specify the option, so it could be None.
+        # However, then Path will raise because you cannot instanciate it
+        # with None. Urgh.
+        if service_account is None:
             path = None
-            # We need to covert that option to a Path. We cannot set it as
-            # default to "" since that will cause an error at the click level:
-            # it will complain that this file does not exists. However, we
-            # should be able to not specify the option, so it could be None.
-            # However, then Path will raise because you cannot instanciate it
-            # with None. Urgh.
-            if service_account is None:
-                path = None
-            else:
-                path = Path(service_account)
-            data = InstallationData(service_account_json=path)
-            if data.fetch():
-                wprint("Got YMAL installation data.", level="info")
-            else:
-                wprint(
-                    "YAML installation data was not found. We cannot proceed.",
-                    level="failure",
-                )
-                sys.exit(EXIT_CODE_YAML_DATA_FAILED)
-        except InstallationDataError as ex:
-            logger.error("Error", ex=ex)
-            wprint(f"{ex}.", level="failure")
-            sys.exit(EXIT_CODE_SERVICE_ACCOUNT_FAILED)
+        else:
+            path = Path(str(service_account))
+        data = InstallationData(service_account_json=path)
+        if data.fetch():
+            wprint("Got YAML installation data.", level="info")
+        else:
+            wprint(
+                "YAML installation data was not found. We cannot proceed.",
+                level="failure",
+            )
+            sys.exit(EXIT_CODE_YAML_DATA_FAILED)
+    except InstallationDataError as ex:
+        logger.error("Error", ex=ex)
+        wprint(f"{ex}.", level="failure")
+        sys.exit(EXIT_CODE_SERVICE_ACCOUNT_FAILED)
 
-        wprint(
-            f"Using service account file {data.service_account_json}.",
-            level="info",
-        )
+    wprint(
+        f"Using service account file {data.service_account_json}.",
+        level="info",
+    )
 
-        wprint(
-            f"Downloading [i]installation[/i] script at version [b]{install}[/b]",  # noqa: E501
-            level="info",
-        )
-        if (
-            not pgp_key()
-            or not pre_flight()
-            or not dlr.get("install", f"v{install}")
-        ):
-            logger.error("Failure to get install script.", version=install)
-            wprint("Operation failed.", level="failure")
-            sys.exit(EXIT_CODE_OPERATION_FAILED)
-        if not dlr.execute_script(
-            "worldr-aa",
-            f"v{install}",
-            data.service_account_json.as_posix(),  # type: ignore
-            [data.blob_name],
-        ):
-            logger.error("Failure to execute install script.", version=install)
-            wprint("Installation script failed.", level="failure")
-            sys.exit(EXIT_CODE_SCRIPT_FAILED)
-        logger.info("Success", script="install")
-
-    elif debug is not None:
-        wprint(
-            f"Downloading [i]debugging[/i] script at version [b]{debug}[/b]",
-            level="info",
-        )
-        if not pgp_key() or not dlr.get("debug", f"v{debug}"):
-            logger.error("Failure to get debug script.", version=debug)
-            wprint("Operation failed.", level="failure")
-            sys.exit(EXIT_CODE_OPERATION_FAILED)
-        if not dlr.execute_script("worldr-debug", f"v{debug}", "", []):
-            logger.error("Failure to execute debug script.", version=install)
-            wprint("Debug script failed.", level="failure")
-            sys.exit(EXIT_CODE_SCRIPT_FAILED)
-        logger.info("Success", script="debug")
-
-    elif backup is not None:
-        wprint(
-            f"Downloading [i]backup & restore[/i] script at version [b]{backup}[/b]",  # noqa: E501
-            level="info",
-        )
-        if not pgp_key() or not dlr.get("backup", f"v{backup}"):
-            logger.error("Failure to get backup script.", version=backup)
-            wprint("Operation failed.", level="failure")
-            sys.exit(EXIT_CODE_OPERATION_FAILED)
-        logger.info("Success", script="backup-restore")
-
-    else:
-        wprint(
-            "You [i]must[/i] specify -i, -b, or -d and a semver version",
-            level="warning",
-        )
-        logger.error("You must specify an option.")
-        wprint("Operation failed.", level="failure")
+    wprint(
+        f"Downloading [i]installation[/i] script at version [b]{install}[/b]",  # noqa: E501
+        level="info",
+    )
+    if (
+        not pgp_key()
+        or not pre_flight()
+        or not dlr.get("install", f"v{install}")
+    ):
+        logger.error("Failure to get install script.", version=install)
+        wprint("Failure to get install script.", level="failure")
         sys.exit(EXIT_CODE_OPERATION_FAILED)
+    if not dlr.execute_script(
+        "worldr-aa",
+        f"v{install}",
+        data.service_account_json.as_posix(),  # type: ignore
+        [data.blob_name],
+    ):
+        logger.error("Failure to execute install script.", version=install)
+        wprint("Installation script failed.", level="failure")
+        sys.exit(EXIT_CODE_SCRIPT_FAILED)
+    logger.info("Success", script="install")
 
-    wprint("Operation was successful.", level="success")
-    sys.exit(EXIT_CODE_SUCCESS)
+
+def _debug(logger: Any, debug: click.Option) -> None:
+    """Run the debug command."""
+    dlr = Downloader()
+    wprint(
+        f"Downloading [i]debugging[/i] script at version [b]{debug}[/b]",
+        level="info",
+    )
+    if not pgp_key() or not dlr.get("debug", f"v{debug}"):
+        logger.error("Failure to get debug script.", version=debug)
+        wprint("Failure to get debug script.", level="failure")
+        sys.exit(EXIT_CODE_OPERATION_FAILED)
+    if not dlr.execute_script("worldr-debug", f"v{debug}", "", []):
+        logger.error("Failure to execute debug script.", version=install)
+        wprint("Debug script failed.", level="failure")
+        sys.exit(EXIT_CODE_SCRIPT_FAILED)
+    logger.info("Success", script="debug")
+
+
+def _backup(logger: Any, backup: click.Option) -> None:
+    """Run the backup command."""
+    dlr = Downloader()
+    wprint(
+        f"Downloading [i]backup & restore[/i] script at version [b]{backup}[/b]",  # noqa: E501
+        level="info",
+    )
+    if not pgp_key() or not dlr.get("backup", f"v{backup}"):
+        logger.error("Failure to get backup script.", version=backup)
+        wprint("Failure to get backup script.", level="failure")
+        sys.exit(EXIT_CODE_OPERATION_FAILED)
+    logger.info("Success", script="backup-restore")
 
 
 if __name__ == "__main__":  # pragma: no cover

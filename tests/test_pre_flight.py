@@ -65,7 +65,7 @@ def test_goss_version_bad(preflight):
         assert preflight._downloader.fetch.called
 
 
-def test_PreFlight_goss_is_cached(preflight):
+def test_pre_flight_goss_is_cached(preflight):
     mgoss = MagicMock(spec=local)
     preflight._goss = mgoss
     assert preflight.goss is mgoss
@@ -130,7 +130,7 @@ def test_run(retcode, mock_preflight):
 
 @patch("setupr.pre_flight.PreFlight.goss", new_callable=PropertyMock)
 @patch("setupr.pre_flight.take_backup")
-def test_run_ProcessExecutionError(m_take_backup, mock_goss, mock_preflight):
+def test_run_process_execution_error(m_take_backup, mock_goss, mock_preflight):
     mopen = mock_open()
     mfdopen = Mock()
     with patch("setupr.pre_flight.os.open", mfdopen), patch(

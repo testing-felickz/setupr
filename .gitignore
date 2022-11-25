@@ -182,6 +182,8 @@ goss-security.yaml
 !tests/ranni-invalid.sa.json
 !tests/ranni-valid.sa.json
 
-
 # Archies
 archives/
+
+# SonarQube data.
+.scannerwork/

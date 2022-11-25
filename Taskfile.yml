@@ -30,6 +30,7 @@ tasks:
             - coverage run -m pytest --doctest-modules
             - coverage combine
             - coverage report -m
+            - coverage xml
         sources:
             - setupr/*.py
             - tests/*.py
@@ -39,6 +40,7 @@ tasks:
             - coverage run --concurrency=thread -m pytest --doctest-modules --slow
             - coverage combine
             - coverage report -m
+            - coverage xml
         sources:
             - setupr/*.py
             - tests/*.py

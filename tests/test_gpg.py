@@ -9,6 +9,8 @@ import pytest
 
 from setupr.gpg import GPG
 
+CHARON_LORD_DUNSANY_TXT = "charon-lord-dunsany.txt"
+
 
 @pytest.fixture()
 def mocked_gpg():
@@ -74,7 +76,7 @@ def test_verify_failure(mocked_gpg):
     verified.status = "signature bad"
     mocked_gpg._gpg.verify_file = MagicMock(return_value=verified)
     filename = PurePath(
-        Path(__file__).resolve().parent, "charon-lord-dunsany.txt"
+        Path(__file__).resolve().parent, CHARON_LORD_DUNSANY_TXT
     )
     signature = PurePath(
         Path(__file__).resolve().parent, "charon-lord-dunsany-bad.sig"
@@ -93,7 +95,7 @@ def test_verify_success(mocked_gpg):
     verified.status = "signature valid"
     mocked_gpg._gpg.verify_file = MagicMock(return_value=verified)
     filename = PurePath(
-        Path(__file__).resolve().parent, "charon-lord-dunsany.txt"
+        Path(__file__).resolve().parent, CHARON_LORD_DUNSANY_TXT
     )
     signature = PurePath(
         Path(__file__).resolve().parent, "charon-lord-dunsany-good.sig"
@@ -128,7 +130,7 @@ def test_verify_for_real():
             "therefore this test cannot run."
         )
     filename = PurePath(
-        Path(__file__).resolve().parent, "charon-lord-dunsany.txt"
+        Path(__file__).resolve().parent, CHARON_LORD_DUNSANY_TXT
     )
     signature = PurePath(
         Path(__file__).resolve().parent, "charon-lord-dunsany-good.sig"

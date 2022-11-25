@@ -33,7 +33,7 @@ def test_get_real_scripts(what: str, version: str, basename: str) -> None:
     """
     # Check if we can connect to the Internet.
     try:
-        requests.head("http://www.google.com/", timeout=1)
+        requests.head("https://www.google.com/", timeout=1)
     except requests.ConnectionError:  # pragma: no cover
         pytest.fail("No internet connection.")
 
@@ -92,7 +92,7 @@ def test_fetch_goss(file: str, url: str) -> None:
     """
     # Check if we can connect to the Internet.
     try:
-        requests.head("http://www.google.com/", timeout=1)
+        requests.head("https://www.google.com/", timeout=1)
     except requests.ConnectionError:  # pragma: no cover
         pytest.fail("No internet connection.")
 

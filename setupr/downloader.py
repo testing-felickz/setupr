@@ -267,11 +267,11 @@ class Downloader:
                 for line in err.splitlines():
                     console.log(f"[{COLOUR_FAIL}]final script stderr: {line}")
                     rlog.error("stderr", script=script, line=line)
-            returnCode = proc.returncode
-            if returnCode != 0:
-                wprint(f"Exit Code {returnCode}", level="failure")
-                rlog.error("Return Code", script=script, code=returnCode)
+            return_code = proc.returncode
+            if return_code != 0:
+                wprint(f"Exit Code {return_code}", level="failure")
+                rlog.error("Return Code", script=script, code=return_code)
                 return False  # Script failed.
-            wprint(f"Exit Code {returnCode}", level="success")
-            rlog.info("Return Code", script=script, code=returnCode)
+            wprint(f"Exit Code {return_code}", level="success")
+            rlog.info("Return Code", script=script, code=return_code)
         return True  # Script succeeded.
