@@ -11,7 +11,6 @@ blob.download_to_filename("test-values.yaml")
 ```
 """
 from pathlib import Path
-from typing import Optional
 
 import structlog
 from google.cloud import storage  # type: ignore
@@ -31,7 +30,7 @@ class InstallationDataError(AttributeError):
 class InstallationData:
     """Get installation data from Google Cloud Storage bucket."""
 
-    def __init__(self, service_account_json: Optional[Path] = None) -> None:
+    def __init__(self, service_account_json: Path | None = None) -> None:
         """Initialize."""
         self.service_account_json = service_account_json
         if not self.service_account_json:

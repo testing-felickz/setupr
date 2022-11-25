@@ -111,7 +111,7 @@ def test_verify_success(mocked_gpg):
 
 @pytest.mark.filterwarnings("ignore:setDaemon")
 def test_verify_for_real():
-    """This does real verifications on the `charon-lord-dunsany.txt` file.
+    """Verify the `charon-lord-dunsany.txt` file for real.
 
     This can only run if the current user has the Worldr key in their keyring.
     This should be true of any developer but not of CI. Thus, the test is

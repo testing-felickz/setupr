@@ -5,7 +5,7 @@ import logging
 import logging.config
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import click
 import semver  # type: ignore
@@ -81,7 +81,8 @@ def configure_logging(log_level: str, verbose: bool) -> None:
             self.param = param
             super()
 
-        def filter(self, _: logging.LogRecord) -> bool:
+        def filter(self, _: logging.LogRecord) -> bool:  # noqa: A003
+            # We have no choice in the method's name.
             # We do not care about record thus mark it as _.
             return verbose
 
@@ -194,7 +195,7 @@ class MutuallyExclusiveOption(click.Option):
     Note that there is no type hinting… I tried and failed.
     """
 
-    def __init__(self, *args, **kwargs):  # type: ignore
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         """Initialize."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
         _help = kwargs.get("help", "")
@@ -206,7 +207,7 @@ class MutuallyExclusiveOption(click.Option):
             )
         super().__init__(*args, **kwargs)
 
-    def handle_parse_result(self, ctx, opts, args):  # type: ignore
+    def handle_parse_result(self, ctx, opts, args) -> Any:  # type: ignore
         """Handle parse result."""
         if self.mutually_exclusive.intersection(opts) and self.name in opts:
             raise click.UsageError(
@@ -218,7 +219,7 @@ class MutuallyExclusiveOption(click.Option):
 
 def validate_semver(
     ctx: click.core.Context, param: click.Option, value: str
-) -> Optional[Any]:
+) -> Any | None:
     """Validate the option is semver compliante.
 
     If the option is None, do nothing.
@@ -229,7 +230,9 @@ def validate_semver(
         ver = semver.VersionInfo.parse(value)
         return ver
     except ValueError as ex:
-        raise click.UsageError(f"{value}: {ex}")
+        # We do want to wrap `ex` in a new exception
+        # so that click can handle it properly.
+        raise click.UsageError(f"{value}: {ex}")  # noqa: B904
 
 
 @click.command(
@@ -309,7 +312,7 @@ def validate_semver(
     "-v", "--version", is_flag=True, help="Print the version and exit"
 )
 @click.option("--verbose", is_flag=True, help="Print the logs to stdout")
-def main(  # noqa: C901
+def main(
     install: click.Option,
     debug: click.Option,
     backup: click.Option,

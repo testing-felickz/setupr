@@ -2,7 +2,6 @@
 # Copyright © 2022-present Worldr Technologies Limited. All Rights Reserved.
 """gBucket tests."""
 from pathlib import Path, PosixPath
-from typing import Optional
 from unittest.mock import Mock, patch
 
 import pytest
@@ -53,7 +52,7 @@ def test_error_sa_files(items: InstallationData) -> None:
     ],
 )
 def test_get(
-    error: Optional[NotFound], expected: bool, sut: InstallationData
+    error: NotFound | None, expected: bool, sut: InstallationData
 ) -> None:
     """Test get."""
     with patch(
