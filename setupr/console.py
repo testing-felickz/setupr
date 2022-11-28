@@ -46,7 +46,7 @@ pre_chain = [
 def configure_logging(log_level: str, verbose: bool) -> None:
     """Configure all the logging."""
     # Logging levels
-    # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level
+    # https://www.structlog.org/en/stable/_modules/structlog/_log_levels.html?highlight=log%20level  # noqa: E501
     _lvl = {
         "critical": 50,
         "error": 40,
