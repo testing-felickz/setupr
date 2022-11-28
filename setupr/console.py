@@ -5,7 +5,7 @@ import logging
 import logging.config
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import click
 import semver  # type: ignore
@@ -195,7 +195,7 @@ class MutuallyExclusiveOption(click.Option):
     Note that there is no type hinting… I tried and failed.
     """
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
         _help = kwargs.get("help", "")
@@ -207,7 +207,9 @@ class MutuallyExclusiveOption(click.Option):
             )
         super().__init__(*args, **kwargs)
 
-    def handle_parse_result(self, ctx, opts, args) -> Any:  # type: ignore
+    def handle_parse_result(
+        self, ctx: click.Context, opts: Mapping[str, Any], args: list[str]
+    ) -> tuple[Any, list[str]]:
         """Handle parse result."""
         if self.mutually_exclusive.intersection(opts) and self.name in opts:
             raise click.UsageError(
@@ -232,6 +234,8 @@ def validate_semver(
     except ValueError as ex:
         # We do want to wrap `ex` in a new exception
         # so that click can handle it properly.
+        rlog = structlog.get_logger("validate_semver")
+        rlog.debug("Debug info.", ctx=ctx, param=param, value=value, error=ex)
         raise click.UsageError(f"{value}: {ex}")  # noqa: B904
 
 

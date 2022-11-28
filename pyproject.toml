@@ -173,7 +173,7 @@ select = [
   "A",
   "T",
   "Q",
-  # "ANN",
+  "ANN",
   "YTT",
   "BLE",
   "RUF",
@@ -199,8 +199,9 @@ extend-ignore = [
   "D415",
   "D416",
   "D417",
+  "ANN101", # Missing type annotation for `self` in method. https://peps.python.org/pep-0673/
   "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in annotations.
-  "U009", # UTF-8 encoding declaration is unnecessary
+  "U009",   # UTF-8 encoding declaration is unnecessary
 ]
 # Always autofix, but never try to fix `F401` (unused imports).
 #fix = true
