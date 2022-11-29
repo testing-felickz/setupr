@@ -36,6 +36,16 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
+              
+            - name: 'Setup Python version'
+              uses: actions/setup-python@v4
+              with:
+                  python-version: 3.11
+
+            - name: 'Set up the environment'
+              uses: ./.github/workflows/setup-poetry-env
+              with:
+                  python-version: 3.11
 
             # Initializes the CodeQL tools for scanning.
             - name: Initialize CodeQL
