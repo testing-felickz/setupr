@@ -42,6 +42,9 @@ jobs:
               with:
                   python-version: 3.11
 
+            - run: |
+               echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv" >> $GITHUB_ENV      
+
             - name: 'Set up the environment'
               uses: ./.github/workflows/setup-poetry-env
               with:
@@ -57,7 +60,6 @@ jobs:
               run: |
                   source .venv/bin/activate
                   echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
-                  echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv" >> $GITHUB_ENV                  
 
             # Initializes the CodeQL tools for scanning.
             - name: 'Initialize CodeQL'
