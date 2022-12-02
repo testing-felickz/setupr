@@ -55,7 +55,7 @@ jobs:
             # https://docs.github.com/en/enterprise-cloud@latest/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#analyzing-python-dependencies
             - name: 'Analyzing Python dependencies'
               run: |
-                  source .venv/bin/activate
+                  #source .venv/bin/activate
                   echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
 
             # Initializes the CodeQL tools for scanning.
