@@ -57,6 +57,7 @@ jobs:
               run: |
                   source .venv/bin/activate
                   echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
+                  echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv" >> $GITHUB_ENV                  
 
             # Initializes the CodeQL tools for scanning.
             - name: 'Initialize CodeQL'
