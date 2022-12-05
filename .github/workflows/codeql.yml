@@ -32,6 +32,9 @@ jobs:
             fail-fast: false
             matrix:
                 language: ['python']
+        env:
+            POETRY_VIRTUALENVS_IN_PROJECT: false
+            POETRY_VIRTUALENVS_PATH: "${{ runner.workspace }}/.venv/bin/activate"
 
         steps:
             - name: 'Checkout repository'
@@ -43,7 +46,7 @@ jobs:
                   python-version: 3.11
 
             - run: |
-               echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv" >> $GITHUB_ENV                
+               echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv/bin/activate" >> $GITHUB_ENV                
                echo "POETRY_VIRTUALENVS_IN_PROJECT=false" >> $GITHUB_ENV 
 
             - name: 'Set up the environment'
