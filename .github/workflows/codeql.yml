@@ -43,7 +43,8 @@ jobs:
                   python-version: 3.11
 
             - run: |
-               echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv" >> $GITHUB_ENV      
+               echo "POETRY_VIRTUALENVS_PATH=${{ runner.workspace }}/.venv" >> $GITHUB_ENV                
+               echo "POETRY_VIRTUALENVS_IN_PROJECT=false" >> $GITHUB_ENV 
 
             - name: 'Set up the environment'
               uses: ./.github/workflows/setup-poetry-env
