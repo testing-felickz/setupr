@@ -34,7 +34,7 @@ jobs:
                 language: ['python']
         env:
             POETRY_VIRTUALENVS_IN_PROJECT: false
-            POETRY_VIRTUALENVS_PATH: "${{ runner.workspace }}/.venv/bin/activate"
+            POETRY_VIRTUALENVS_PATH: "/home/runner/work/setupr/.venv/bin/activate"
 
         steps:
             - name: 'Checkout repository'
