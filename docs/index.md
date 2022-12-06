@@ -5,7 +5,7 @@
 [![Commit activity](https://img.shields.io/github/commit-activity/m/worldr/setupr)](https://img.shields.io/github/commit-activity/m/worldr/setupr)
 [![License](https://img.shields.io/github/license/worldr/setupr)](https://img.shields.io/github/license/worldr/setupr)
 
-***Setupr ships the Worldr infrastructure…***
+**_Setupr ships the Worldr infrastructure…_**
 
 ## Setupr: The New Way
 
@@ -23,14 +23,14 @@ feature is coming soon…
 
 This is what the `worldr_setup.bash` (in gitops) script did:
 
-* Install GPG Worldr key & install GPG if needed.
-* Downloads & verify the infrastructure installation script.
-* Downloads & verify the debug script.
-* Downloads & verify the backup & restore script.
-* Downloads & installs [goss](https://github.com/aelsabbahy/goss).
-* Runs security pre-flight checks.
-* Runs infrastructure pre-flight checks.
-* Verifies that all downloaded scripts are `bash` ones.
+- Install GPG Worldr key & install GPG if needed.
+- Downloads & verify the infrastructure installation script.
+- Downloads & verify the debug script.
+- Downloads & verify the backup & restore script.
+- Downloads & installs [goss](https://github.com/goss-org/goss).
+- Runs security pre-flight checks.
+- Runs infrastructure pre-flight checks.
+- Verifies that all downloaded scripts are `bash` ones.
 
 When we install it (via `curl`), we need to check its `sha256sum` which is
 cumbersome.

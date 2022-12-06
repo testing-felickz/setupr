@@ -35,7 +35,7 @@ def test_goss_version_good(preflight):
     def _side_efect(cmd):  # pragma: no cover
         if "--version" in cmd:
             return "goss version v0.3.16\n"
-        pytest.fail("Unexpected call to goss")  # Fail safe!
+        return pytest.fail("Unexpected call to goss")  # Fail safe!
 
     mgoss = MagicMock(side_effect=_side_efect)
     preflight._downloader = MagicMock(spec=Downloader)
@@ -49,7 +49,7 @@ def test_goss_version_bad(preflight):
     def _side_efect(cmd):  # pragma: no cover
         if "--version" in cmd:
             return "goß älért"  # Non chance!
-        pytest.fail("Unexpected call to goss")  # Fail safe!
+        return pytest.fail("Unexpected call to goss")  # Fail safe!
 
     mgoss = MagicMock(side_effect=_side_efect)
     preflight._downloader = MagicMock(spec=Downloader)

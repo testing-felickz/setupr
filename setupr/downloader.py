@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
 from types import FrameType
-from typing import Iterable, List, Optional
+from typing import Iterable
 
 import pendulum
 import requests
@@ -59,7 +59,7 @@ done_event = Event()
 
 
 def handle_sigint(
-    signum: int, frame: Optional[FrameType]
+    signum: int, frame: FrameType | None
 ) -> None:  # pragma: no cover
     """Handle SIGINT signal.
 
@@ -118,11 +118,7 @@ def download(urls: Iterable[str], dest_dir: str) -> None:
             future = pool.submit(
                 copy_url, task_id, url, dest_path.as_posix(), progress
             )
-            try:
-                future.result()
-            except Exception as ex:
-                rlog.error("Download failed", url=url)
-                raise ex
+            future.result()
 
 
 def take_backup(filename: Path) -> Path:
@@ -178,15 +174,14 @@ class Downloader:
         if what in ["install"]:
             rlog.info("Downloading installation script")
             return self._get_files("worldr-aa", version)
-        elif what in ["debug"]:
+        if what in ["debug"]:
             rlog.info("Downloading debug script")
             return self._get_files("worldr-debug", version)
-        elif what in ["backup"]:
+        if what in ["backup"]:
             rlog.info("Downloading backup script")
             return self._get_files("backup-restore", version)
-        else:
-            rlog.warning("Option not supported", option=what)
-            return False
+        rlog.warning("Option not supported", option=what)
+        return False
 
     def fetch(
         self, source: str, destination: Path, expected_hash: str
@@ -209,8 +204,12 @@ class Downloader:
             return False
         return True
 
-    def execute_script(  # noqa
-        self, what: str, version: str, ser_acc: str, values: List[str]
+    def execute_script(
+        self,
+        what: str,
+        version: str,
+        ser_acc: str,
+        values: list[str],
     ) -> bool:
         """Execute the script what at version.
 
@@ -247,7 +246,7 @@ class Downloader:
         ):
             args = [ser_acc] + values
             rlog.info("command arguments", args=args)
-            proc = script.popen(args, close_fds=True)  # type: ignore  # noqa
+            proc = script.popen(args, close_fds=True)  # type: ignore
             for raw in proc.stdout:
                 line = raw.decode("utf-8").strip()
                 line_low = line.lower()
