@@ -13,8 +13,11 @@ from typing import Any
 
 import distro
 import structlog
-from plumbum import ProcessExecutionError  # type: ignore
-from plumbum import CommandNotFound, local
+from plumbum import (  # type: ignore
+    CommandNotFound,
+    ProcessExecutionError,
+    local,
+)
 
 from setupr.downloader import Downloader, take_backup
 

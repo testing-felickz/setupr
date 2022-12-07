@@ -32,9 +32,11 @@ jobs:
             fail-fast: false
             matrix:
                 language: ['python']
+        env:
+            POETRY_VIRTUALENVS_IN_PROJECT: false
 
         steps:
-            - name: Checkout repository
+            - name: 'Checkout repository'
               uses: actions/checkout@v3
               
             - name: 'Setup Python version'
@@ -47,8 +49,14 @@ jobs:
               with:
                   python-version: 3.11
 
+            # https://docs.github.com/en/enterprise-cloud@latest/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#analyzing-python-dependencies
+            - name: 'Analyzing Python dependencies'
+              run: |
+                  source .venv/bin/activate
+                  echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
+
             # Initializes the CodeQL tools for scanning.
-            - name: Initialize CodeQL
+            - name: 'Initialize CodeQL'
               uses: github/codeql-action/init@v2
               with:
                   languages: ${{ matrix.language }}
@@ -57,17 +65,12 @@ jobs:
                   # to auto-install Python dependencies
                   setup-python-dependencies: false
 
-            # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
-            # If this step fails, then you should remove it and run the build manually (see below)
-            - name: Autobuild
-              uses: github/codeql-action/autobuild@v2
-
             #   If the Autobuild fails above, remove it and uncomment the following three lines.
             # - run: |
             #   echo "Run, Build Application using script"
             #   ./location_of_script_within_repo/buildscript.sh
 
-            - name: Perform CodeQL Analysis
+            - name: 'Perform CodeQL Analysis'
               uses: github/codeql-action/analyze@v2
               with:
                   category: '/language:${{matrix.language}}'

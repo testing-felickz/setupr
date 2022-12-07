@@ -83,7 +83,7 @@ def test_get_real_scripts(what: str, version: str, basename: str) -> None:
     ],
 )
 def test_fetch_goss(file: str, url: str) -> None:
-    """This does it all for real, iff we have access to the internet.
+    """Fetches for real, iff we have access to the internet.
 
     It tests that we can download all the goss definition files, and
     that the checksum are correct.
@@ -112,7 +112,7 @@ def test_fetch_goss(file: str, url: str) -> None:
     ],
 )
 def test_execute_script(ret_code: int, expected: bool) -> None:
-    """This does things for real and will take time."""
+    """Executes things for real and will take time."""
     with patch("setupr.downloader.Confirm") as mocked_confirm:
         mocked_confirm.ask = Mock(return_value=True)
         sut = Downloader()

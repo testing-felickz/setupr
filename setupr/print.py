@@ -42,15 +42,9 @@ if __name__ == "__main__":  # pragma: no cover
         "[i][b]I Have Never Known Defeat.[/i][/b] "
         "[black]:skull:[/black]"
     )
-    print("Nothing:   ", end="")
     wprint(f"{TEXT}")
-    print("Note:      ", end="")
     wprint(f"{TEXT}", "note")
-    print("Info:      ", end="")
     wprint(f"{TEXT}", "info")
-    print("Success:   ", end="")
     wprint(f"{TEXT}", "success")
-    print("Warning:   ", end="")
     wprint(f"{TEXT}", "warning")
-    print("Failure:   ", end="")
     wprint(f"{TEXT}", "failure")

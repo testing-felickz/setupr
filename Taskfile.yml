@@ -125,7 +125,8 @@ tasks:
     check-ruff:
         desc: '(experimental) Ruff checks'
         cmds:
-            - ruff -v setupr/*.py tests/*.py
+            - ruff setupr/*.py tests/*.py
+            # - ruff -v setupr/*.py tests/*.py
         sources:
             - setupr/**/*.py
             - setupr/**/*.py
