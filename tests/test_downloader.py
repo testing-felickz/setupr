@@ -7,7 +7,6 @@ import stat
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from glob import glob
-from typing import Optional
 from unittest.mock import ANY, MagicMock, Mock, patch
 
 import gnupg
@@ -60,12 +59,12 @@ def test_download() -> None:
         prefix="setupr_tests_"
     ) as tmpdirname, patch(
         "setupr.downloader.ThreadPoolExecutor"
-    ) as mocked_ThreadPoolExecutor:
+    ) as mocked_thread_pool_executor:
         pool = MagicMock(spec=ThreadPoolExecutor)
         fut = Mock()
         fut.result = Mock()
         pool.submit = Mock(return_value=fut)
-        mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
+        mocked_thread_pool_executor.return_value.__enter__ = Mock(
             return_value=pool
         )
         download(
@@ -86,12 +85,12 @@ def test_download_failed() -> None:
         prefix="setupr_tests_"
     ) as tmpdirname, patch(
         "setupr.downloader.ThreadPoolExecutor"
-    ) as mocked_ThreadPoolExecutor:
+    ) as mocked_thread_pool_executor:
         pool = MagicMock(spec=ThreadPoolExecutor)
         fut = Mock()
         fut.result = Mock(side_effect=requests.exceptions.RequestException)
         pool.submit = Mock(return_value=fut)
-        mocked_ThreadPoolExecutor.return_value.__enter__ = Mock(
+        mocked_thread_pool_executor.return_value.__enter__ = Mock(
             return_value=pool
         )
 
@@ -188,7 +187,7 @@ def test_downloader_get_files(
 )
 def test_get_files(
     sig: bool,
-    error: Optional[Exception],
+    error: Exception | None,
     expected: bool,
     downloader: Downloader,
 ) -> None:
@@ -230,7 +229,7 @@ def test_get_files(
 )
 def test_fetch(
     sha: str,
-    error: Optional[Exception],
+    error: Exception | None,
     expected: bool,
     downloader: Downloader,
 ) -> None:

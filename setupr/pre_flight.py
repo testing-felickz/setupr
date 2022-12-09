@@ -13,15 +13,18 @@ from typing import Any
 
 import distro
 import structlog
-from plumbum import ProcessExecutionError  # type: ignore
-from plumbum import CommandNotFound, local
+from plumbum import (  # type: ignore
+    CommandNotFound,
+    ProcessExecutionError,
+    local,
+)
 
 from setupr.downloader import Downloader, take_backup
 
 rlog = structlog.get_logger("setupr.pre_flight")
 
 GOSS_EXE = "goss-linux-amd64"
-GOSS_URL = "https://github.com/aelsabbahy/goss/releases/download"
+GOSS_URL = "https://github.com/goss-org/goss/releases/download"
 GOSS_VERSION = "v0.3.16"
 URL_BASE_CHECKS = "https://storage.googleapis.com/worldr-install"
 SHA256SUM = {

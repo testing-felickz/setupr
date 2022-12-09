@@ -33,16 +33,14 @@ class GPG:
             "Worldr-MST-installation-PGP-key.asc",
         )
         rlog.debug("The path to the key", path=key)
-        with open(key, "r") as fd:
+        with open(key) as fd:
             key_data = fd.read()
         import_result = self._gpg.import_keys(key_data)
         if import_result.count == 1:
             fp = import_result.fingerprints[0]
             rlog.info(
                 "PGP key imported successfully.",
-                fingerprint=[
-                    fp[i : i + 4] for i in range(0, len(fp), 4)
-                ],  # noqa: E203
+                fingerprint=[fp[i : i + 4] for i in range(0, len(fp), 4)],
             )
             self._gpg.trust_keys(
                 import_result.fingerprints[0], "TRUST_ULTIMATE"

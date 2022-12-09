@@ -2,7 +2,7 @@
 # ___/ Usefull stuff you do WANT for all repositories. \________________________
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.3.0
+      rev: v4.4.0
       hooks:
           - id: trailing-whitespace
           - id: end-of-file-fixer
@@ -63,7 +63,7 @@ repos:
     #     ___________________________
     # ___/ Semantic commit messages. \_____________________________________________
     - repo: https://github.com/jorisroovers/gitlint
-      rev: v0.17.0
+      rev: v0.18.0
       hooks:
           - id: gitlint
     #     ________________
@@ -75,10 +75,10 @@ repos:
     #     _______________
     # ___/ GH linting    \_________________________________________________________
     - repo: https://github.com/python-jsonschema/check-jsonschema
-      rev: 0.18.4
+      rev: 0.19.2
       hooks:
           - id: check-github-actions
     - repo: https://github.com/python-jsonschema/check-jsonschema
-      rev: 0.18.4
+      rev: 0.19.2
       hooks:
           - id: check-dependabot

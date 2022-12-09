@@ -52,9 +52,8 @@ def pre_flight() -> bool:
         rlog.error(msg)
         wprint(msg, level="failure")
         return False
-    else:
-        wprint(
-            "Infrastructure pre flight checks passed, all is well.",
-            level="success",
-        )
+    wprint(
+        "Infrastructure pre flight checks passed, all is well.",
+        level="success",
+    )
     return True

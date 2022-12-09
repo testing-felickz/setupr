@@ -34,9 +34,9 @@ jobs:
                 language: ['python']
 
         steps:
-            - name: Checkout repository
+            - name: 'Checkout repository'
               uses: actions/checkout@v3
-              
+
             - name: 'Setup Python version'
               uses: actions/setup-python@v4
               with:
@@ -47,8 +47,19 @@ jobs:
               with:
                   python-version: 3.11
 
+            - name: 'Set up the environment'
+              uses: ./.github/workflows/setup-poetry-env
+              with:
+                  python-version: ${{ matrix.python-version }}
+
+            # https://docs.github.com/en/enterprise-cloud@latest/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#analyzing-python-dependencies
+            - name: 'Analyzing Python dependencies'
+              run: |
+                  source .venv/bin/activate
+                  echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
+
             # Initializes the CodeQL tools for scanning.
-            - name: Initialize CodeQL
+            - name: 'Initialize CodeQL'
               uses: github/codeql-action/init@v2
               with:
                   languages: ${{ matrix.language }}
@@ -59,7 +70,7 @@ jobs:
 
             # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
             # If this step fails, then you should remove it and run the build manually (see below)
-            - name: Autobuild
+            - name: 'Autobuild'
               uses: github/codeql-action/autobuild@v2
 
             #   If the Autobuild fails above, remove it and uncomment the following three lines.
@@ -67,7 +78,30 @@ jobs:
             #   echo "Run, Build Application using script"
             #   ./location_of_script_within_repo/buildscript.sh
 
-            - name: Perform CodeQL Analysis
+            - name: 'Perform CodeQL Analysis'
               uses: github/codeql-action/analyze@v2
               with:
+                  language: python
                   category: '/language:${{matrix.language}}'
+                  upload: False
+                  output: sarif-results
+
+            - name: 'filter SARIF'
+              uses: advanced-security/filter-sarif@v1
+              with:
+                  patterns: |
+                      -**/.venv/**
+                  input: sarif-results/python.sarif
+                  output: sarif-results/python.sarif
+
+            - name: 'Upload SARIF'
+              uses: github/codeql-action/upload-sarif@v2
+              with:
+                  sarif_file: sarif-results/python.sarif
+
+            - name: 'Upload loc as a Build Artifact'
+              uses: actions/upload-artifact@v2.2.0
+              with:
+                  name: sarif-results
+                  path: sarif-results
+                  retention-days: 1
